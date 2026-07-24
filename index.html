@@ -361,13 +361,22 @@ function getOverride(date) { return DB.overrides && DB.overrides[date] ? DB.over
 function applyOverride(task, date) {
   const ov = getOverride(date);
   if (!ov) return true;
+  const d = parseDate(date);
+  const weekday = d.getDay() === 0 ? 7 : d.getDay();
+  const isWeekend = weekday >= 6;
   if (ov.type === 'workday') {
     // 休息日变工作日：隐藏休闲类
     if (REST_CATS.includes(task.cat)) return false;
     return true;
   }
   if (ov.type === 'restday') {
-    // 工作日变休息日：所有任务正常显示
+    // 工作日变休息日：显示周末任务（阅读、运动等 days 含六日的）
+    if (task.freq === 'weekly' && task.days) {
+      // 如果任务本来就排在今天，正常显示
+      if (task.days.includes(weekday)) return true;
+      // 如果今天不是周末，但任务排在周末，变休息日后也显示
+      if (!isWeekend && task.days.some(dd => dd >= 6)) return true;
+    }
     return true;
   }
   if (ov.type === 'busy') {
@@ -375,7 +384,7 @@ function applyOverride(task, date) {
     return CORE_IDS.includes(task.id);
   }
   if (ov.type === 'overtime') {
-    // 加班：隐藏时间在 endTime 之后的非核心任务（运动、梳头等晚间任务）
+    // 加班：隐藏时间在 endTime 之后的非核心任务
     if (task.time && ov.endTime && task.time > ov.endTime) return false;
     return true;
   }
@@ -527,7 +536,7 @@ function renderStats() {
 function renderTaskList(containerId, freq, label) {
   const today = todayStr();
   const allTasks = getTasks().filter(t => t.freq === freq);
-  const todayTasks = allTasks.filter(t => freq === 'daily' || shouldShowTask(t, today));
+  const todayTasks = allTasks.filter(t => shouldShowTask(t, today));
   todayTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const list = document.getElementById(containerId); list.innerHTML = '';
   if (allTasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
@@ -592,7 +601,7 @@ function renderCalendar() {
     el.textContent = i;
     if (ds <= today) {
       // 完成率：统计当天所有该做的任务（每日 + 符合 days 规则的周期任务）
-      const allDayTasks = getTasks().filter(t => t.freq === 'daily' || shouldShowTask(t, ds));
+      const allDayTasks = getTasks().filter(t => shouldShowTask(t, ds));
       const done = allDayTasks.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length;
       const rate = allDayTasks.length > 0 ? done / allDayTasks.length : 0;
       if (rate > 0) { const bar = document.createElement('div'); bar.className = 'rate-bar'; const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = (rate * 100) + '%'; bar.appendChild(fill); el.appendChild(bar); }
@@ -610,7 +619,7 @@ function renderCalDay() {
   const calOv = getOverride(calSelected);
   document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}${calOv ? ' · 🔧' + (OVERRIDE_NAME[calOv.type] || '已调整') : ''}`;
   // 时间轴：每日任务 + 当天应显示的周期任务，按时间排序
-  const tlTasks = getTasks().filter(t => t.freq === 'daily' || shouldShowTask(t, calSelected));
+  const tlTasks = getTasks().filter(t => shouldShowTask(t, calSelected));
   tlTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const tlContainer = document.getElementById('calTimeline');
   tlContainer.innerHTML = '';
