@@ -222,6 +222,7 @@
 </div>
 <script>
 const DEFAULT_TASKS = [
+  // 每日
   { id: 'sleep', name: '睡觉', cat: 'health', freq: 'daily', target: 1, time: '23:00' },
   { id: 'wash', name: '洗漱', cat: 'health', freq: 'daily', target: 1, time: '07:30' },
   { id: 'breakfast', name: '早餐', cat: 'life', freq: 'daily', target: 1, time: '08:00' },
@@ -234,20 +235,23 @@ const DEFAULT_TASKS = [
   { id: 'offWork', name: '下班回家', cat: 'life', freq: 'daily', target: 1, time: '21:00' },
   { id: 'skincare', name: '护肤', cat: 'beauty', freq: 'daily', target: 1, time: '22:00' },
   { id: 'relax', name: '放松时间', cat: 'leisure', freq: 'daily', target: 1, time: '22:30' },
-  { id: 'meridian', name: '经络梳头', cat: 'health', freq: 'weekly', target: 3, time: '22:10' },
-  { id: 'mask', name: '面膜', cat: 'beauty', freq: 'weekly', target: 1, time: '22:05' },
-  { id: 'shave', name: '刮脸', cat: 'beauty', freq: 'weekly', target: 2, time: '22:15' },
-  { id: 'english', name: '学英语', cat: 'growth', freq: 'weekly', target: 4, time: '08:30' },
-  { id: 'writing', name: '练字', cat: 'growth', freq: 'weekly', target: 4, time: '08:50' },
-  { id: 'bedsheet', name: '换床单被套', cat: 'family', freq: 'weekly', target: 1, time: '10:30' },
-  { id: 'blackhead', name: '去黑头', cat: 'beauty', freq: 'monthly', target: 1, time: '22:20' },
-  { id: 'photo', name: '拍合照', cat: 'family', freq: 'monthly', target: 1, time: '17:00' },
-  { id: 'movie', name: '看剧看电影', cat: 'leisure', freq: 'monthly', target: 2, time: '14:00' },
-  { id: 'craft', name: '手工', cat: 'growth', freq: 'monthly', target: 2, time: '09:30' },
-  { id: 'nail', name: '美甲', cat: 'beauty', freq: 'quarterly', target: 1, time: '14:00' },
-  { id: 'underwear', name: '买内衣', cat: 'beauty', freq: 'quarterly', target: 1, time: '15:00' },
-  { id: 'declutter', name: '断舍离', cat: 'family', freq: 'quarterly', target: 1, time: '10:30' },
-  { id: 'album', name: '整理相册', cat: 'life', freq: 'quarterly', target: 1, time: '16:00' },
+  // 每周
+  { id: 'meridian', name: '经络梳头', cat: 'health', freq: 'weekly', target: 3, time: '22:10', days: [1, 3, 5] },
+  { id: 'mask', name: '面膜', cat: 'beauty', freq: 'weekly', target: 1, time: '22:05', days: [3] },
+  { id: 'shave', name: '刮脸', cat: 'beauty', freq: 'weekly', target: 2, time: '22:15', days: [2, 6] },
+  { id: 'english', name: '学英语', cat: 'growth', freq: 'weekly', target: 4, time: '08:30', days: [1, 2, 3, 4] },
+  { id: 'writing', name: '练字', cat: 'growth', freq: 'weekly', target: 4, time: '08:50', days: [1, 2, 3, 4] },
+  { id: 'bedsheet', name: '换床单被套', cat: 'family', freq: 'weekly', target: 1, time: '10:30', days: [7] },
+  // 每月
+  { id: 'blackhead', name: '去黑头', cat: 'beauty', freq: 'monthly', target: 1, time: '22:20', days: [15] },
+  { id: 'photo', name: '拍合照', cat: 'family', freq: 'monthly', target: 1, time: '17:00', days: [1] },
+  { id: 'movie', name: '看剧看电影', cat: 'leisure', freq: 'monthly', target: 2, time: '14:00', days: [10, 25] },
+  { id: 'craft', name: '手工', cat: 'growth', freq: 'monthly', target: 2, time: '09:30', days: [8, 22] },
+  // 每季度
+  { id: 'nail', name: '美甲', cat: 'beauty', freq: 'quarterly', target: 1, time: '14:00', days: [5] },
+  { id: 'underwear', name: '买内衣', cat: 'beauty', freq: 'quarterly', target: 1, time: '15:00', days: [1] },
+  { id: 'declutter', name: '断舍离', cat: 'family', freq: 'quarterly', target: 1, time: '10:30', days: [7] },
+  { id: 'album', name: '整理相册', cat: 'life', freq: 'quarterly', target: 1, time: '16:00', days: [20] },
 ];
 const CAT_NAME = { health: '健康', beauty: '形象', growth: '能力', family: '家庭', leisure: '休闲', life: '生活' };
 const CAT_COLOR = { health: 'var(--health-deep)', beauty: 'var(--beauty-deep)', growth: 'var(--growth-deep)', family: 'var(--family-deep)', leisure: 'var(--leisure-deep)', life: 'var(--ink-soft)' };
@@ -265,8 +269,8 @@ function loadData() {
     }
     const data = JSON.parse(raw);
     if (!data.tasks) data.tasks = DEFAULT_TASKS;
-    // 给旧任务补 time 字段
-    data.tasks.forEach(t => { if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; } });
+    // 给旧任务补 time / days 字段
+    data.tasks.forEach(t => { if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; } if (t.freq !== 'daily' && !t.days) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.days) t.days = d.days; else t.days = []; } });
     if (!data.records) data.records = {};
     if (!data.moods) data.moods = {};
     return data;
@@ -299,6 +303,24 @@ function getTaskCount(taskId, refDate) {
   let count = 0; Object.keys(DB.records[taskId]).forEach(d => { if (d >= start && d <= refDate) count++; }); return count;
 }
 function toggleTask(taskId, date) { if (!DB.records[taskId]) DB.records[taskId] = {}; if (DB.records[taskId][date]) delete DB.records[taskId][date]; else DB.records[taskId][date] = 1; saveData(); }
+
+// 判断某任务在某日期是否应该显示（根据days规则）
+function shouldTaskShowOnDate(task, date) {
+  if (task.freq === 'daily') return true;
+  const d = parseDate(date);
+  if (getTaskCount(task.id, date) >= task.target) return false;
+  if (!task.days || task.days.length === 0) return true; // 未设置days则每天都显示
+  if (task.freq === 'weekly') return task.days.includes(d.getDay() === 0 ? 7 : d.getDay());
+  if (task.freq === 'monthly') return task.days.includes(d.getDate());
+  if (task.freq === 'quarterly') return task.days.includes(d.getDate());
+  return true;
+}
+function daysText(task) {
+  if (task.freq === 'weekly') return '周' + task.days.map(d => ['日','一','二','三','四','五','六'][d === 7 ? 0 : d]).join('、');
+  if (task.freq === 'monthly') return '每月' + task.days.join('、') + '号';
+  if (task.freq === 'quarterly') return '每季度' + task.days.join('、') + '号';
+  return '';
+}
 
 // 渲染时间轴（用于日历页和首页每日任务）
 function renderTimelineForDate(container, date, isFuture) {
@@ -354,8 +376,8 @@ function renderStats() {
   document.getElementById('weekRate').textContent = wt > 0 ? Math.round(wd / wt * 100) + '%' : '0%';
 }
 function renderTaskList(containerId, freq, label) {
-  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq);
-  if (freq === 'daily') tasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
+  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq).filter(t => freq === 'daily' || shouldTaskShowOnDate(t, today));
+  tasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const list = document.getElementById(containerId); list.innerHTML = ''; let done = 0;
   if (tasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
   tasks.forEach(t => {
@@ -366,8 +388,9 @@ function renderTaskList(containerId, freq, label) {
     if (isDone) return;
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '');
-    const showTime = freq === 'daily' && t.time;
-    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}`;
+    const showTime = t.time;
+    const daysInfo = freq !== 'daily' ? daysText(t) : '';
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}`;
     el.onclick = () => { toggleTask(t.id, today); render(); };
     list.appendChild(el);
   });
@@ -411,31 +434,24 @@ function renderCalDay() {
   const d = parseDate(calSelected); const weekdays = ['日','一','二','三','四','五','六'];
   const today = todayStr(); const isFuture = calSelected > today;
   document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}`;
-  // 时间轴只显示每日任务
-  renderTimelineForDate('calTimeline', calSelected, isFuture, true);
-  // 周/月/季任务单独列
-  const extra = document.getElementById('calExtraTasks');
-  extra.innerHTML = '';
-  const extraTasks = getTasks().filter(t => t.freq !== 'daily' && getTaskCount(t.id, calSelected) < t.target);
-  if (extraTasks.length > 0) {
-    const title = document.createElement('div');
-    title.className = 'section-title';
-    title.style.marginTop = '8px';
-    title.innerHTML = '<span class="dot" style="background:var(--growth-deep)"></span>周期任务';
-    extra.appendChild(title);
-    const list = document.createElement('div');
-    list.className = 'task-list';
-    extraTasks.forEach(t => {
-      const count = getTaskCount(t.id, calSelected);
-      const isDone = count >= t.target;
+  // 时间轴：每日任务 + 当天应显示的周期任务，按时间排序
+  const tlTasks = getTasks().filter(t => t.freq === 'daily' || shouldTaskShowOnDate(t, calSelected));
+  tlTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
+  const tlContainer = document.getElementById('calTimeline');
+  tlContainer.innerHTML = '';
+  if (tlTasks.length === 0) { tlContainer.innerHTML = '<div class="empty">✨ 这天没有安排</div>'; }
+  else {
+    tlTasks.forEach(t => {
+      const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
       const el = document.createElement('div');
-      el.className = 'task-item' + (isDone ? ' done' : '');
-      el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div></div><div class="task-progress ${isDone ? 'done' : ''}">${count}/${t.target}</div>`;
-      if (!isFuture) { el.onclick = () => { toggleTask(t.id, calSelected); renderCalDay(); render(); }; }
-      list.appendChild(el);
+      el.className = 'tl-item';
+      el.innerHTML = `<div class="tl-time">${t.time || ''}</div><div class="tl-dot ${isDone ? 'done' : ''}"></div><div class="tl-card ${isDone ? 'done' : ''}"><div class="tl-title">${t.name}</div><div class="tl-desc"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span>${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}${t.freq!=='daily'&&t.days&&t.days.length?' · '+daysText(t):''}</div></div>`;
+      if (!isFuture) { el.querySelector('.tl-card').style.cursor = 'pointer'; el.querySelector('.tl-card').onclick = () => { toggleTask(t.id, calSelected); renderCalDay(); render(); }; }
+      tlContainer.appendChild(el);
     });
-    extra.appendChild(list);
   }
+  // 隐藏多余的周期任务列表区域
+  document.getElementById('calExtraTasks').innerHTML = '';
 }
 
 // 规划页
@@ -447,7 +463,7 @@ function renderPlan() {
     if (catTasks.length === 0) return;
     const el = document.createElement('div'); el.className = 'plan-cat-card';
     let rows = '';
-    catTasks.forEach(t => { rows += `<div class="plan-task-row" data-task-id="${t.id}"><span class="pt-name">${t.name}</span><span class="pt-freq">${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div>`; });
+    catTasks.forEach(t => { const daysInfo = t.freq !== 'daily' && t.days && t.days.length ? ' · ' + daysText(t) : ''; const timeInfo = t.time ? ' · ' + t.time : ''; rows += `<div class="plan-task-row" data-task-id="${t.id}"><span class="pt-name">${t.name}</span><span class="pt-freq">${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}${timeInfo}${daysInfo}</span></div>`; });
     el.innerHTML = `<div class="plan-cat-header"><span class="cat-icon">${CAT_ICON[cat]}</span><span class="cat-name">${CAT_NAME[cat]}</span><span class="cat-count">${catTasks.length} 项</span></div>${rows}`;
     el.querySelectorAll('.plan-task-row').forEach(row => { row.onclick = () => { const task = findTask(row.dataset.taskId); if (task) showDeleteTask(task); }; });
     container.appendChild(el);
@@ -455,32 +471,73 @@ function renderPlan() {
 }
 
 // 任务管理
+function buildDaysSelector(freq, selected) {
+  selected = selected || [];
+  if (freq === 'weekly') {
+    const names = ['一','二','三','四','五','六','日'];
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    for (let i = 1; i <= 7; i++) {
+      const on = selected.includes(i);
+      html += `<div class="day-chip${on?' on':''}" data-day="${i}" style="padding:6px 12px;border-radius:8px;border:1.5px solid ${on?'var(--beauty-deep)':'var(--line)'};background:${on?'rgba(244,182,194,0.2)':'var(--bg)'};color:${on?'var(--beauty-deep)':'var(--ink-soft)'};font-size:13px;cursor:pointer;">周${names[i-1]}</div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+  if (freq === 'monthly' || freq === 'quarterly') {
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:4px;max-height:120px;overflow-y:auto;">';
+    for (let i = 1; i <= 31; i++) {
+      const on = selected.includes(i);
+      html += `<div class="day-chip${on?' on':''}" data-day="${i}" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1.5px solid ${on?'var(--beauty-deep)':'var(--line)'};background:${on?'rgba(244,182,194,0.2)':'var(--bg)'};color:${on?'var(--beauty-deep)':'var(--ink-soft)'};font-size:11px;cursor:pointer;">${i}</div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+  return '';
+}
+function getSelectedDays() {
+  return Array.from(document.querySelectorAll('.day-chip.on')).map(el => parseInt(el.dataset.day));
+}
 function showAddTaskModal(prefill) {
   const catOptions = Object.keys(CAT_NAME).map(c => `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`).join('');
   const freqOptions = Object.keys(FREQ_NAME).map(f => `<option value="${f}" ${prefill && prefill.freq === f ? 'selected' : ''}>${FREQ_NAME[f]}</option>`).join('');
-  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field" id="timeField"><label>时间（仅每日任务）</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field"><label>目标次数</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30"></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
+  const initFreq = prefill ? prefill.freq : 'daily';
+  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field"><label>时间</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field" id="targetField"><label>目标次数${initFreq==='daily'?'（每日固定1次）':''}</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30" ${initFreq==='daily'?'disabled':''}></div><div class="field" id="daysField"><label id="daysLabel">设置周期</label><div id="daysContainer">${buildDaysSelector(initFreq, prefill ? prefill.days : null)}</div></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
   document.getElementById('taskFreqInput').onchange = (e) => {
+    const freq = e.target.value;
     const ti = document.getElementById('taskTargetInput');
-    const tf = document.getElementById('timeField');
-    if (e.target.value === 'daily') { ti.value = 1; tf.style.display = 'block'; }
-    else { if (ti.value < 2) ti.value = 3; tf.style.display = 'none'; }
+    const df = document.getElementById('daysField');
+    const dl = document.getElementById('daysLabel');
+    const tfl = document.querySelector('#targetField label');
+    if (freq === 'daily') { ti.value = 1; ti.disabled = true; df.style.display = 'none'; if(tfl) tfl.textContent = '目标次数（每日固定1次）'; }
+    else { ti.disabled = false; if (ti.value < 2) ti.value = 3; df.style.display = 'block'; if(tfl) tfl.textContent = '目标次数'; dl.textContent = freq === 'weekly' ? '设置周几（可多选）' : '设置几号（可多选）'; document.getElementById('daysContainer').innerHTML = buildDaysSelector(freq, null); bindDayChips(); }
   };
-  // 初始化时间字段显示
-  if (prefill && prefill.freq !== 'daily') document.getElementById('timeField').style.display = 'none';
-  else if (!prefill) document.getElementById('timeField').style.display = 'block';
+  function bindDayChips() {
+    document.querySelectorAll('.day-chip').forEach(chip => {
+      chip.onclick = () => {
+        if (chip.classList.contains('on')) { chip.classList.remove('on'); chip.style.borderColor = 'var(--line)'; chip.style.background = 'var(--bg)'; chip.style.color = 'var(--ink-soft)'; }
+        else { chip.classList.add('on'); chip.style.borderColor = 'var(--beauty-deep)'; chip.style.background = 'rgba(244,182,194,0.2)'; chip.style.color = 'var(--beauty-deep)'; }
+      };
+    });
+  }
+  bindDayChips();
+  // 初始化 daysField 显示状态
+  if (initFreq === 'daily') document.getElementById('daysField').style.display = 'none';
   document.getElementById('saveTaskBtn').onclick = () => {
     const name = document.getElementById('taskNameInput').value.trim();
     if (!name) { toast('请输入任务名称'); return; }
     const cat = document.getElementById('taskCatInput').value; const freq = document.getElementById('taskFreqInput').value;
-    const time = freq === 'daily' ? document.getElementById('taskTimeInput').value : '';
+    const time = document.getElementById('taskTimeInput').value;
     const target = Math.max(1, parseInt(document.getElementById('taskTargetInput').value) || 1);
-    if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.time = time; task.cat = cat; task.freq = freq; task.target = target; } }
-    else { DB.tasks.push({ id: 't_' + Date.now(), name, time, cat, freq, target }); }
+    const days = freq !== 'daily' ? getSelectedDays() : undefined;
+    if (freq !== 'daily' && days.length === 0) { toast('请设置周期（周几或几号）'); return; }
+    if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.time = time; task.cat = cat; task.freq = freq; task.target = target; if (freq !== 'daily') task.days = days; else delete task.days; } }
+    else { const nt = { id: 't_' + Date.now(), name, time, cat, freq, target }; if (freq !== 'daily') nt.days = days; DB.tasks.push(nt); }
     saveData(); closeModal(); render(); renderPlan(); toast(prefill ? '任务已更新' : '任务已添加');
   };
 }
 function showDeleteTask(task) {
-  showModal(`<h3>编辑任务</h3><p style="font-size:14px;color:var(--ink);margin-bottom:14px;text-align:center;">${task.time || ''} · ${task.name}</p><button class="btn danger" id="confirmDelTask" style="background:var(--beauty-deep);color:white;">删除任务</button><button class="btn" id="editTaskBtn" style="background:var(--bg);">编辑详情</button><div class="close" onclick="closeModal()">取消</div>`);
+  const daysInfo = task.freq !== 'daily' && task.days && task.days.length ? ' · ' + daysText(task) : '';
+  showModal(`<h3>编辑任务</h3><p style="font-size:14px;color:var(--ink);margin-bottom:14px;text-align:center;">${task.time || ''} ${task.name}${daysInfo}</p><button class="btn danger" id="confirmDelTask" style="background:var(--beauty-deep);color:white;">删除任务</button><button class="btn" id="editTaskBtn" style="background:var(--bg);">编辑详情</button><div class="close" onclick="closeModal()">取消</div>`);
   document.getElementById('confirmDelTask').onclick = () => { DB.tasks = DB.tasks.filter(t => t.id !== task.id); saveData(); closeModal(); render(); renderPlan(); toast('任务已删除'); };
   document.getElementById('editTaskBtn').onclick = () => { closeModal(); showAddTaskModal(task); };
 }
@@ -537,7 +594,7 @@ document.getElementById('manageTasksBtn').onclick = () => {
   const listEl = document.getElementById('taskEditList');
   getTasks().forEach(t => {
     const el = document.createElement('div'); el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--line);cursor:pointer;';
-    el.innerHTML = `<div><div style="font-size:14px;">${t.name}</div><div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}${t.freq==='daily'&&t.time?' · '+t.time:''}</div></div><span style="color:var(--ink-faint);">›</span>`;
+    el.innerHTML = `<div><div style="font-size:14px;">${t.name}</div><div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}${t.time?' · '+t.time:''}${t.freq!=='daily'&&t.days&&t.days.length?' · '+daysText(t):''}</div></div><span style="color:var(--ink-faint);">›</span>`;
     el.onclick = () => { closeModal(); showDeleteTask(t); }; listEl.appendChild(el);
   });
   document.getElementById('addNewTaskFromManage').onclick = () => { closeModal(); showAddTaskModal(null); };
