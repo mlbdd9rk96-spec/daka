@@ -295,7 +295,7 @@ function loadData() {
     if (!data.moods) data.moods = {};
     if (!data.overrides) data.overrides = {};
     return data;
-  } catch(e) { return { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() }; }
+  } catch(e) { return { tasks: DEFAULT_TASKS, records: {}, moods: {}, overrides: {}, startDate: todayStr() }; }
 }
 function saveData() { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
 let DB = loadData();
