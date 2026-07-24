@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daka-cache-v9';
+const CACHE_NAME = 'daka-cache-v10';
 const URLS_TO_CACHE = [
   '/daka/',
   '/daka/index.html'
@@ -30,10 +30,15 @@ self.addEventListener('activate', (event) => {
 
 // fetch 策略：网络优先，失败时回退缓存
 self.addEventListener('fetch', (event) => {
+  // 带 ?v= 参数的请求强制走网络（刷新按钮用）
+  const url = new URL(event.request.url);
+  if (url.searchParams.has('v')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // 网络请求成功，更新缓存
         const responseClone = response.clone();
         caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, responseClone);
@@ -41,7 +46,6 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // 网络失败，用缓存
         return caches.match(event.request);
       })
   );
