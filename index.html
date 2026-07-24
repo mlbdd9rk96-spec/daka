@@ -879,10 +879,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 0;
+    padding: 8px 4px;
     border-bottom: 1px solid var(--line);
     font-size: 13px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
   }
+  .plan-task-row:active { background: var(--bg); }
   .plan-task-row:last-child { border-bottom: none; }
   .plan-task-row .pt-name { color: var(--ink); }
   .plan-task-row .pt-freq {
@@ -1901,7 +1904,7 @@ function renderPlan() {
     catTasks.forEach(t => {
       const freqText = FREQ_NAME[t.freq] + (t.target > 1 ? ' '+t.target+'次' : '');
       rows += `
-        <div class="plan-task-row">
+        <div class="plan-task-row" data-task-id="${t.id}" style="cursor:pointer;">
           <span class="pt-name">${t.name}</span>
           <span class="pt-freq">${freqText}</span>
         </div>
@@ -1915,6 +1918,13 @@ function renderPlan() {
       </div>
       ${rows}
     `;
+    // 绑定点击编辑
+    el.querySelectorAll('.plan-task-row').forEach(row => {
+      row.onclick = () => {
+        const task = findTask(row.dataset.taskId);
+        if (task) showDeleteTask(task);
+      };
+    });
     container.appendChild(el);
   });
 }
