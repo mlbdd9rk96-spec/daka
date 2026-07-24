@@ -72,6 +72,7 @@
   .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: 8px; font-size: 12px; color: var(--ink); position: relative; cursor: pointer; }
   .cal-day.other { color: var(--ink-faint); opacity: 0.4; }
   .cal-day.today { background: var(--beauty); color: white; font-weight: 600; }
+  .cal-day.selected { box-shadow: 0 0 0 2px var(--beauty-deep) inset; }
   .cal-day .rate-bar { position: absolute; bottom: 2px; left: 20%; right: 20%; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
   .cal-day .rate-bar .fill { height: 100%; background: var(--health-deep); }
   .mood-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft); text-align: center; }
@@ -248,19 +249,32 @@ const CAT_COLOR = { health: 'var(--health-deep)', beauty: 'var(--beauty-deep)', 
 const CAT_ICON = { health: '🌿', beauty: '💄', growth: '📚', family: '🏡', leisure: '🎬', life: '✨' };
 const FREQ_NAME = { daily: '每日', weekly: '每周', monthly: '每月', quarterly: '每季度' };
 
-const STORE_KEY = 'workbench_v4';
+const STORE_KEY = 'workbench_v5';
+const OLD_KEYS = ['workbench_v4', 'workbench_v3', 'workbench_v2'];
 function loadData() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (!raw) {
-      const old = localStorage.getItem('workbench_v3') || localStorage.getItem('workbench_v2');
-      if (old) { const o = JSON.parse(old); return { tasks: DEFAULT_TASKS, records: o.records || {}, moods: o.moods || {}, startDate: todayStr() }; }
+      // 尝试从旧版本迁移
+      for (const oldKey of OLD_KEYS) {
+        const old = localStorage.getItem(oldKey);
+        if (old) {
+          const o = JSON.parse(old);
+          const migrated = { tasks: DEFAULT_TASKS, records: o.records || {}, moods: o.moods || {}, startDate: o.startDate || todayStr() };
+          localStorage.setItem(STORE_KEY, JSON.stringify(migrated)); // 写入新 key
+          return migrated;
+        }
+      }
       return { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() };
     }
     const data = JSON.parse(raw);
     if (!data.tasks) data.tasks = DEFAULT_TASKS;
     // 给旧任务补 time / days / biweek 字段
-    data.tasks.forEach(t => { if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; } if (t.freq !== 'daily' && !t.days) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.days) t.days = d.days; else t.days = []; } if (t.freq === 'weekly' && t.biweek === undefined) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.biweek !== undefined) t.biweek = d.biweek; } });
+    data.tasks.forEach(t => {
+      if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; }
+      if (t.freq !== 'daily' && !t.days) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.days) t.days = d.days; else t.days = []; }
+      if (t.freq === 'weekly' && t.biweek === undefined) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.biweek !== undefined) t.biweek = d.biweek; }
+    });
     if (!data.records) data.records = {};
     if (!data.moods) data.moods = {};
     return data;
@@ -271,11 +285,6 @@ let DB = loadData();
 if (!Array.isArray(DB.tasks)) DB.tasks = DEFAULT_TASKS;
 function getTasks() { return DB.tasks; }
 function findTask(id) { return DB.tasks.find(t => t.id === id); }
-// 获取当天应该显示的任务（每日 + 本周期内的周/月/季任务），按时间排序
-function getTodayTasks(date) {
-  return getTasks().filter(t => t.freq === 'daily')
-    .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
-}
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
@@ -322,31 +331,6 @@ function daysText(task) {
   if (task.freq === 'monthly') return '每月' + task.days.join('、') + '号';
   if (task.freq === 'quarterly') return '每季度' + task.days.join('、') + '号';
   return '';
-}
-
-// 渲染时间轴（用于日历页和首页每日任务）
-function renderTimelineForDate(container, date, isFuture) {
-  const list = document.getElementById(container);
-  list.innerHTML = '';
-  const tasks = getTodayTasks(date);
-  if (tasks.length === 0) { list.innerHTML = '<div class="empty">✨ 全部完成！</div>'; return; }
-  tasks.forEach(t => {
-    const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][date];
-    const el = document.createElement('div');
-    el.className = 'tl-item';
-    el.innerHTML = `
-      <div class="tl-time">${t.time || ''}</div>
-      <div class="tl-dot ${isDone ? 'done' : ''}"></div>
-      <div class="tl-card ${isDone ? 'done' : ''}">
-        <div class="tl-title">${t.name}</div>
-        <div class="tl-desc"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span>${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</div>
-      </div>`;
-    if (!isFuture) {
-      el.querySelector('.tl-card').style.cursor = 'pointer';
-      el.querySelector('.tl-card').onclick = () => { toggleTask(t.id, date); render(); if (container === 'calTimeline') renderCalDay(); };
-    }
-    list.appendChild(el);
-  });
 }
 
 function render() { renderHeader(); renderStats(); renderDaily(); renderWeekly(); renderMonthly(); renderQuarterly(); renderMood(); }
@@ -404,6 +388,11 @@ function renderTaskList(containerId, freq, label) {
     const daysInfo = freq !== 'daily' ? daysText(t) : '';
     el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress">${progressText}</div>` : ''}`;
     el.onclick = () => { toggleTask(t.id, today); render(); };
+    // 长按删除
+    let pressTimer;
+    el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { if (confirm(`删除任务「${t.name}」？`)) { DB.tasks = DB.tasks.filter(x => x.id !== t.id); saveData(); render(); renderPlan(); toast('任务已删除'); } }, 600); });
+    el.addEventListener('touchend', () => clearTimeout(pressTimer));
+    el.addEventListener('touchmove', () => clearTimeout(pressTimer));
     list.appendChild(el);
   });
   const doneKey = freq === 'daily' ? 'dailyDone' : freq === 'weekly' ? 'weekDone' : freq === 'monthly' ? 'monthDone' : 'quarterDone';
@@ -412,12 +401,13 @@ function renderTaskList(containerId, freq, label) {
   const todayTotal = todayTasks.length;
   document.getElementById(doneKey).textContent = Math.min(done, todayTotal);
   document.getElementById(totalKey).textContent = todayTotal;
-  if (done >= todayTotal && todayTotal > 0) { const el = document.createElement('div'); el.className = 'empty'; el.textContent = ['全部完成！太棒了 🎉','今日已清空，厉害 💪','都搞定啦，休息一下�� ✨'][Math.floor(Math.random()*3)]; list.appendChild(el); }
+  if (done >= todayTotal && todayTotal > 0) { const el = document.createElement('div'); el.className = 'empty'; el.textContent = ['全部完成！太棒了 🎉','今日已清空，厉害 💪','都搞定啦，休息一下吧 ✨'][Math.floor(Math.random()*3)]; list.appendChild(el); }
+  return todayTotal;
 }
-function renderDaily() { renderTaskList('dailyList', 'daily', '每天'); }
-function renderWeekly() { renderTaskList('weekList', 'weekly', '本周'); }
-function renderMonthly() { renderTaskList('monthList', 'monthly', '本月'); }
-function renderQuarterly() { renderTaskList('quarterList', 'quarterly', '本季度'); }
+function renderDaily() { const n = renderTaskList('dailyList', 'daily', '每天'); document.querySelector('#dailyList').closest('.section').style.display = n === 0 ? 'none' : ''; }
+function renderWeekly() { const n = renderTaskList('weekList', 'weekly', '本周'); document.querySelector('#weekList').closest('.section').style.display = n === 0 ? 'none' : ''; }
+function renderMonthly() { const n = renderTaskList('monthList', 'monthly', '本月'); document.querySelector('#monthList').closest('.section').style.display = n === 0 ? 'none' : ''; }
+function renderQuarterly() { const n = renderTaskList('quarterList', 'quarterly', '本季度'); document.querySelector('#quarterList').closest('.section').style.display = n === 0 ? 'none' : ''; }
 function renderMood() { const today = todayStr(); const cur = DB.moods[today]; document.querySelectorAll('#moodRow .mood-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.mood) === cur)); }
 
 // 日历
@@ -435,9 +425,15 @@ function renderCalendar() {
   for (let i = 1; i <= daysInMonth; i++) {
     const ds = `${y}-${pad(m+1)}-${pad(i)}`; const el = document.createElement('div');
     el.className = 'cal-day'; if (ds === today) el.classList.add('today');
-    if (ds === calSelected && ds !== today) el.style.background = 'var(--line)';
+    if (ds === calSelected) el.classList.add('selected');
     el.textContent = i;
-    if (ds <= today) { const dt = getTasks().filter(t => t.freq === 'daily'); const done = dt.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length; const rate = dt.length > 0 ? done / dt.length : 0; if (rate > 0) { const bar = document.createElement('div'); bar.className = 'rate-bar'; const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = (rate * 100) + '%'; bar.appendChild(fill); el.appendChild(bar); } }
+    if (ds <= today) {
+      // 完成率：统计当天所有该做的任务（每日 + 符合 days 规则的周期任务）
+      const allDayTasks = getTasks().filter(t => t.freq === 'daily' || shouldTaskShowOnDate(t, ds));
+      const done = allDayTasks.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length;
+      const rate = allDayTasks.length > 0 ? done / allDayTasks.length : 0;
+      if (rate > 0) { const bar = document.createElement('div'); bar.className = 'rate-bar'; const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = (rate * 100) + '%'; bar.appendChild(fill); el.appendChild(bar); }
+    }
     el.onclick = () => { calSelected = ds; renderCalendar(); renderCalDay(); };
     grid.appendChild(el);
   }
@@ -454,7 +450,7 @@ function renderCalDay() {
   tlTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const tlContainer = document.getElementById('calTimeline');
   tlContainer.innerHTML = '';
-  if (tlTasks.length === 0) { tlContainer.innerHTML = '<div class="empty">✨ 这天没有安排</div>'; }
+  if (tlTasks.length === 0) { tlContainer.innerHTML = `<div class="empty">${isFuture ? '📅 这天暂无安排' : '✨ 这天没有安排'}</div>`; }
   else {
     tlTasks.forEach(t => {
       const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
