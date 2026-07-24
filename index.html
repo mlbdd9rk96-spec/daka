@@ -222,36 +222,26 @@
 </div>
 <script>
 const DEFAULT_TASKS = [
-  // 每日
-  { id: 'sleep', name: '睡觉', cat: 'health', freq: 'daily', target: 1, time: '23:00' },
+  // 每日（5项）
   { id: 'wash', name: '洗漱', cat: 'health', freq: 'daily', target: 1, time: '07:30' },
   { id: 'breakfast', name: '早餐', cat: 'life', freq: 'daily', target: 1, time: '08:00' },
-  { id: 'makeup', name: '化妆', cat: 'beauty', freq: 'daily', target: 1, time: '08:20' },
-  { id: 'reading', name: '阅读', cat: 'growth', freq: 'daily', target: 1, time: '08:40' },
-  { id: 'piano', name: '弹钢琴', cat: 'growth', freq: 'daily', target: 1, time: '09:10' },
-  { id: 'sport', name: '运动', cat: 'health', freq: 'daily', target: 1, time: '10:00' },
-  { id: 'goWork', name: '出门上班', cat: 'life', freq: 'daily', target: 1, time: '11:00' },
-  { id: 'work', name: '工作时间', cat: 'life', freq: 'daily', target: 1, time: '12:00' },
-  { id: 'offWork', name: '下班回家', cat: 'life', freq: 'daily', target: 1, time: '21:00' },
+  { id: 'study', name: '学习（英语/练字轮换）', cat: 'growth', freq: 'daily', target: 1, time: '08:30' },
   { id: 'skincare', name: '护肤', cat: 'beauty', freq: 'daily', target: 1, time: '22:00' },
-  { id: 'relax', name: '放松时间', cat: 'leisure', freq: 'daily', target: 1, time: '22:30' },
-  // 每周
-  { id: 'meridian', name: '经络梳头', cat: 'health', freq: 'weekly', target: 3, time: '22:10', days: [1, 3, 5] },
-  { id: 'mask', name: '面膜', cat: 'beauty', freq: 'weekly', target: 1, time: '22:05', days: [3] },
-  { id: 'shave', name: '刮脸', cat: 'beauty', freq: 'weekly', target: 2, time: '22:15', days: [2, 6] },
-  { id: 'english', name: '学英语', cat: 'growth', freq: 'weekly', target: 4, time: '08:30', days: [1, 2, 3, 4] },
-  { id: 'writing', name: '练字', cat: 'growth', freq: 'weekly', target: 4, time: '08:50', days: [1, 2, 3, 4] },
-  { id: 'bedsheet', name: '换床单被套', cat: 'family', freq: 'weekly', target: 1, time: '10:30', days: [7] },
-  // 每月
-  { id: 'blackhead', name: '去黑头', cat: 'beauty', freq: 'monthly', target: 1, time: '22:20', days: [15] },
-  { id: 'photo', name: '拍合照', cat: 'family', freq: 'monthly', target: 1, time: '17:00', days: [1] },
-  { id: 'movie', name: '看剧看电影', cat: 'leisure', freq: 'monthly', target: 2, time: '14:00', days: [10, 25] },
-  { id: 'craft', name: '手工', cat: 'growth', freq: 'monthly', target: 2, time: '09:30', days: [8, 22] },
-  // 每季度
-  { id: 'nail', name: '美甲', cat: 'beauty', freq: 'quarterly', target: 1, time: '14:00', days: [5] },
-  { id: 'underwear', name: '买内衣', cat: 'beauty', freq: 'quarterly', target: 1, time: '15:00', days: [1] },
+  { id: 'sleep', name: '睡觉', cat: 'health', freq: 'daily', target: 1, time: '23:00' },
+  // 每周（7项）—— 钢琴和手工交替，各两周一次
+  { id: 'meridian', name: '经络梳头', cat: 'health', freq: 'weekly', target: 2, time: '22:10', days: [1, 4] },
+  { id: 'mask', name: '面膜', cat: 'beauty', freq: 'weekly', target: 2, time: '22:05', days: [2, 5] },
+  { id: 'makeup', name: '化妆', cat: 'beauty', freq: 'weekly', target: 2, time: '08:15', days: [1, 4] },
+  { id: 'reading', name: '阅读', cat: 'growth', freq: 'weekly', target: 2, time: '09:00', days: [6, 7] },
+  { id: 'sport', name: '运动', cat: 'health', freq: 'weekly', target: 2, time: '22:30', days: [3, 7] },
+  { id: 'piano', name: '弹钢琴', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [6] },
+  { id: 'craft', name: '手工', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [7] },
+  // 每月（3项）
+  { id: 'nail', name: '美甲', cat: 'beauty', freq: 'monthly', target: 1, time: '14:00', days: [1] },
+  { id: 'photo', name: '拍合照', cat: 'family', freq: 'monthly', target: 1, time: '17:00', days: [15] },
+  { id: 'movie', name: '看剧看电影', cat: 'leisure', freq: 'monthly', target: 1, time: '14:00', days: [22] },
+  // 每季度（1项）
   { id: 'declutter', name: '断舍离', cat: 'family', freq: 'quarterly', target: 1, time: '10:30', days: [7] },
-  { id: 'album', name: '整理相册', cat: 'life', freq: 'quarterly', target: 1, time: '16:00', days: [20] },
 ];
 const CAT_NAME = { health: '健康', beauty: '形象', growth: '能力', family: '家庭', leisure: '休闲', life: '生活' };
 const CAT_COLOR = { health: 'var(--health-deep)', beauty: 'var(--beauty-deep)', growth: 'var(--growth-deep)', family: 'var(--family-deep)', leisure: 'var(--leisure-deep)', life: 'var(--ink-soft)' };
