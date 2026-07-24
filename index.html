@@ -1703,7 +1703,26 @@ function renderCalDay() {
     list.innerHTML = '<div class="empty">暂无任务</div>';
     return;
   }
-  tasks.forEach(t => {
+
+  // 过滤掉已完成（达标）的任务
+  const visibleTasks = tasks.filter(t => {
+    if (t.freq === 'daily') {
+      // 每日任务：当天完成则隐藏
+      const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
+      return !isDone;
+    } else {
+      // 周期任务：当前周期已达标则隐藏
+      const count = getTaskCount(t.id, calSelected);
+      return count < t.target;
+    }
+  });
+
+  if (visibleTasks.length === 0) {
+    list.innerHTML = '<div class="empty">✨ 全部完成！</div>';
+    return;
+  }
+
+  visibleTasks.forEach(t => {
     const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '') + (isFuture ? ' future' : '');
