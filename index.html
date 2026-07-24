@@ -352,7 +352,6 @@ function daysText(task) {
 
 // ========== 智能调整（本地规则匹配）==========
 const REST_CATS = ['leisure']; // 休闲类：休息日才做
-const WORK_CATS = []; // 没有严格的工作日专属分类
 const CORE_IDS = ['wash', 'breakfast', 'sleep']; // 核心：出差也保留
 
 // 获取某日的调整规则
@@ -368,12 +367,17 @@ function applyOverride(task, date) {
     return true;
   }
   if (ov.type === 'restday') {
-    // 工作日变休息日：所有任务正常显示（休息日不做工作日专属的，目前没有）
+    // 工作日变休息日：所有任务正常显示
     return true;
   }
   if (ov.type === 'busy') {
     // 出差/忙碌：只保留核心
     return CORE_IDS.includes(task.id);
+  }
+  if (ov.type === 'overtime') {
+    // 加班：隐藏时间在 endTime 之后的非核心任务（运动、梳头等晚间任务）
+    if (task.time && ov.endTime && task.time > ov.endTime) return false;
+    return true;
   }
   return true;
 }
@@ -396,17 +400,16 @@ function parseUserInput(text) {
   else if (/明天|明日/.test(text)) targetDate = addDays(today, 1);
   else if (/后天/.test(text)) targetDate = addDays(today, 2);
   else {
-    // 这周X / 下周X
     const weekMap = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '日': 7, '天': 7 };
-    let m = text.match(/这周周?(.)/);
+    let m = text.match(/这周(.)/);
     if (m && weekMap[m[1]]) {
       const targetDay = weekMap[m[1]];
       const curDay = todayDate.getDay() === 0 ? 7 : todayDate.getDay();
       targetDate = addDays(today, targetDay - curDay);
-      if (targetDate < today) targetDate = addDays(targetDate, 7); // 如果已过，算下周
+      if (targetDate < today) targetDate = addDays(targetDate, 7);
     }
     if (!targetDate) {
-      m = text.match(/下周周?(.)/);
+      m = text.match(/下周(.)/);
       if (m && weekMap[m[1]]) {
         const targetDay = weekMap[m[1]];
         const curDay = todayDate.getDay() === 0 ? 7 : todayDate.getDay();
@@ -414,34 +417,38 @@ function parseUserInput(text) {
       }
     }
     if (!targetDate) {
-      // X号
       m = text.match(/(\d+)号/);
       if (m) {
         const dayNum = parseInt(m[1]);
         targetDate = `${todayDate.getFullYear()}-${pad(todayDate.getMonth()+1)}-${pad(dayNum)}`;
-        if (targetDate < today) targetDate = addDays(targetDate, 30); // 如果已过，算下月
+        if (targetDate < today) targetDate = addDays(targetDate, 30);
       }
     }
   }
-  if (!targetDate) targetDate = today; // 默认今天
+  if (!targetDate) targetDate = today;
 
-  // 意图识别
-  if (/上班|调班|补班|加班班/.test(text) && !/加班/.test(text)) type = 'workday';
-  else if (/加班|晚到|到.*点/.test(text)) {
+  // 意图识别（先判断"不上班"再判断"上班"，避免误匹配）
+  if (/不上班|不加班/.test(text)) type = 'restday';
+  else if (/加班/.test(text)) {
     type = 'overtime';
-    const tm = text.match(/(\d+)[点:：](\d+)?/) || text.match(/到(\d+)点/);
+    const tm = text.match(/到?(\d+)[点:：](\d+)?/) || text.match(/到(\d+)点/);
     if (tm) endTime = `${pad(parseInt(tm[1]))}:${tm[2] ? pad(parseInt(tm[2])) : '00'}`;
   }
   else if (/出差|外出|忙碌|没空|很忙/.test(text)) type = 'busy';
-  else if (/休息|放假|调休|不上班/.test(text)) type = 'restday';
-  else if (/上班|补班/.test(text)) type = 'workday';
+  else if (/休息|放假|调休/.test(text)) type = 'restday';
+  else if (/上班|调班|补班/.test(text)) type = 'workday';
 
   if (!type) return null;
   return { date: targetDate, type, endTime, reason: text };
 }
 
-// 调整类型中文名
 const OVERRIDE_NAME = { workday: '变工作日', restday: '变休息日', overtime: '加班', busy: '出差/忙碌' };
+const OVERRIDE_EFFECT = {
+  workday: '隐藏休闲类任务（阅读、电影等）',
+  restday: '按休息日模式安排',
+  overtime: '隐藏加班结束后的晚间任务',
+  busy: '只保留核心任务（洗漱、早餐、睡觉）'
+};
 
 function render() { renderHeader(); renderSmartBar(); renderStats(); renderDaily(); renderWeekly(); renderMonthly(); renderQuarterly(); renderMood(); }
 
@@ -450,40 +457,44 @@ function renderSmartBar() {
   const bar = document.getElementById('smartAdjustBar');
   const today = todayStr();
   const ov = getOverride(today);
+  // 收集所有未来的 overrides
+  const futureOvs = Object.entries(DB.overrides || {}).filter(([d]) => d >= today).sort();
   if (ov) {
-    // 今天有调整：显示标记 + 撤销
     const d = parseDate(today);
-    bar.innerHTML = `<div class="smart-bar"><div class="smart-active"><span>🔧</span><span>今天${OVERRIDE_NAME[ov.type] || '已调整'}</span><span class="tag">${ov.reason}</span><span class="cancel" id="removeOverride">撤销</span></div></div>`;
+    bar.innerHTML = `<div class="smart-bar"><div class="smart-active"><span>🔧</span><span>今天${OVERRIDE_NAME[ov.type] || '已调整'}</span><span class="tag">${ov.reason}</span><span class="cancel" id="removeOverride">撤销</span></div>${futureOvs.length > 1 ? `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);">还有 ${futureOvs.length - 1} 个未来调整</div>` : ''}</div>`;
     document.getElementById('removeOverride').onclick = () => { delete DB.overrides[today]; saveData(); render(); toast('已撤销调整'); };
+  } else if (futureOvs.length > 0) {
+    // 今天没调整但有未来的
+    const items = futureOvs.map(([d, o]) => { const dt = parseDate(d); const w = ['日','一','二','三','四','五','六'][dt.getDay()]; return `${dt.getMonth()+1}/${dt.getDate()} 周${w} ${OVERRIDE_NAME[o.type]}`; }).join('、');
+    bar.innerHTML = `<div class="smart-bar"><div class="smart-active"><span>🔧</span><span>已规划调整</span><span class="tag">${items}</span><span class="cancel" id="clearAllOvs">全部撤销</span></div><div class="smart-btn" id="smartToggle" style="margin-top:8px;">+ 添加新调整</div></div>`;
+    document.getElementById('clearAllOvs').onclick = () => { futureOvs.forEach(([d]) => delete DB.overrides[d]); saveData(); render(); toast('已撤销所有调整'); };
+    document.getElementById('smartToggle').onclick = openSmartInput;
   } else {
-    // 显示输入入口
     bar.innerHTML = `<div class="smart-bar"><div class="smart-btn" id="smartToggle">🤖 智能调整今日安排</div></div>`;
-    document.getElementById('smartToggle').onclick = () => {
-      bar.innerHTML = `<div class="smart-bar"><div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">🤖 告诉我今天的特殊情况</div><div class="smart-input-row"><input type="text" id="smartInput" placeholder="如：这周六上班、明天休息、今天加班到10点" /><button id="smartGo">解析</button></div><div id="smartPreview"></div></div>`;
-      const input = document.getElementById('smartInput');
-      input.focus();
-      document.getElementById('smartGo').onclick = () => {
-        const text = input.value.trim();
-        if (!text) { toast('请输入内容'); return; }
-        const result = parseUserInput(text);
-        const preview = document.getElementById('smartPreview');
-        if (!result) { preview.innerHTML = '<span style="color:var(--beauty-deep);">没能识别，试试"这周六上班"、"明天休息"、"今天加班到10点"</span>'; return; }
-        const d = parseDate(result.date);
-        const w = ['日','一','二','三','四','五','六'][d.getDay()];
-        let effect = '';
-        if (result.type === 'workday') effect = '隐藏休闲类任务（阅读、电影等）';
-        else if (result.type === 'restday') effect = '按休息日模式安排';
-        else if (result.type === 'overtime') effect = `下班时间延至${result.endTime || '22:00'}`;
-        else if (result.type === 'busy') effect = '只保留核心任务（洗漱、早餐、睡觉）';
-        preview.innerHTML = `识别到：<b>${d.getMonth()+1}月${d.getDate()}日 周${w}${OVERRIDE_NAME[result.type]}</b><br>效果：${effect}<br><button id="smartConfirm" style="margin-top:8px;padding:8px 16px;border:none;border-radius:8px;background:var(--growth-deep);color:white;font-size:13px;cursor:pointer;">确认调整</button>`;
-        document.getElementById('smartConfirm').onclick = () => {
-          if (!DB.overrides) DB.overrides = {};
-          DB.overrides[result.date] = { type: result.type, endTime: result.endTime, reason: text };
-          saveData(); render(); toast(`已调整：${d.getMonth()+1}月${d.getDate()}日${OVERRIDE_NAME[result.type]}`);
-        };
-      };
-    };
+    document.getElementById('smartToggle').onclick = openSmartInput;
   }
+}
+function openSmartInput() {
+  const bar = document.getElementById('smartAdjustBar');
+  bar.innerHTML = `<div class="smart-bar"><div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">🤖 告诉我特殊情况</div><div class="smart-input-row"><input type="text" id="smartInput" placeholder="如：这周六上班、明天休息、今天加班到10点" /><button id="smartGo">解析</button></div><div id="smartPreview"></div></div>`;
+  const input = document.getElementById('smartInput');
+  input.focus();
+  document.getElementById('smartGo').onclick = () => {
+    const text = input.value.trim();
+    if (!text) { toast('请输入内容'); return; }
+    const result = parseUserInput(text);
+    const preview = document.getElementById('smartPreview');
+    if (!result) { preview.innerHTML = '<span style="color:var(--beauty-deep);">没能识别，试试"这周六上班"、"明天休息"、"今天加班到10点"</span>'; return; }
+    const d = parseDate(result.date);
+    const w = ['日','一','二','三','四','五','六'][d.getDay()];
+    preview.innerHTML = `识别到：<b>${d.getMonth()+1}月${d.getDate()}日 周${w} ${OVERRIDE_NAME[result.type]}</b><br>效果：${OVERRIDE_EFFECT[result.type]}<br><button id="smartConfirm" style="margin-top:8px;padding:8px 16px;border:none;border-radius:8px;background:var(--growth-deep);color:white;font-size:13px;cursor:pointer;">确认调整</button>`;
+    document.getElementById('smartConfirm').onclick = () => {
+      if (!DB.overrides) DB.overrides = {};
+      DB.overrides[result.date] = { type: result.type, endTime: result.endTime, reason: text };
+      saveData(); render(); toast(`已调整：${d.getMonth()+1}月${d.getDate()}日${OVERRIDE_NAME[result.type]}`);
+    };
+  };
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('smartGo').click(); });
 }
 function renderHeader() {
   const d = new Date(); const weekdays = ['日','一','二','三','四','五','六'];
@@ -596,7 +607,8 @@ function renderCalendar() {
 function renderCalDay() {
   const d = parseDate(calSelected); const weekdays = ['日','一','二','三','四','五','六'];
   const today = todayStr(); const isFuture = calSelected > today;
-  document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}`;
+  const calOv = getOverride(calSelected);
+  document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}${calOv ? ' · 🔧' + (OVERRIDE_NAME[calOv.type] || '已调整') : ''}`;
   // 时间轴：每日任务 + 当天应显示的周期任务，按时间排序
   const tlTasks = getTasks().filter(t => t.freq === 'daily' || shouldShowTask(t, calSelected));
   tlTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
