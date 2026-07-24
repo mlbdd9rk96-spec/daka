@@ -2,6 +2,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script>
+// 版本检测：如果本地版本和服务器不一致，强制清 SW + 缓存后重载
+window.APP_VERSION = 'v15';
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
+  caches.keys().then(names => names.forEach(n => caches.delete(n)));
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>我的工作台 · 每日打卡</title>
 <link rel="manifest" href="manifest.json">
@@ -770,14 +780,20 @@ function toast(msg) { const el = document.getElementById('toast'); el.textConten
 
 document.querySelectorAll('#moodRow .mood-btn').forEach(b => { b.onclick = () => { const m = parseInt(b.dataset.mood); const today = todayStr(); if (DB.moods[today] === m) delete DB.moods[today]; else DB.moods[today] = m; saveData(); renderMood(); toast(DB.moods[today] ? '心情已记录' : '已取消'); }; });
 document.getElementById('refreshBtn').onclick = async () => {
-  // 注销旧 Service Worker，清空缓存，强制从服务器重新加载
-  if ('serviceWorker' in navigator) {
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (const r of regs) await r.unregister();
-    const cacheNames = await caches.keys();
-    for (const name of cacheNames) await caches.delete(name);
-  }
-  location.href = location.pathname + '?v=' + Date.now();
+  // 显示刷新动画
+  const btn = document.getElementById('refreshBtn');
+  btn.style.transition = 'transform 0.5s ease'; btn.style.transform = 'rotate(360deg)';
+  // 注销旧 Service Worker，清空缓存
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) await r.unregister();
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) await caches.delete(name);
+    }
+  } catch(e) {}
+  // 短暂延迟后跳转（让旋转动画跑完）
+  setTimeout(() => { location.href = location.pathname + '?t=' + Date.now(); }, 300);
 };
 document.querySelectorAll('.tab').forEach(tab => {
   tab.onclick = () => {

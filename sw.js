@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daka-cache-v15';
+const CACHE_NAME = 'daka-cache-v16';
 const URLS_TO_CACHE = [
   '/daka/',
   '/daka/index.html'
