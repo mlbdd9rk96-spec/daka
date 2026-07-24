@@ -17,962 +17,191 @@
     --ink-soft: #8B7E78;
     --ink-faint: #C9BCB5;
     --line: #F0E6DE;
-    --health: #A8C9A8;       /* 健康绿 */
+    --health: #A8C9A8;
     --health-deep: #7BA87B;
-    --beauty: #F4B6C2;       /* 形象粉 */
+    --beauty: #F4B6C2;
     --beauty-deep: #E08899;
-    --growth: #B8B4D9;       /* 能力紫 */
+    --growth: #B8B4D9;
     --growth-deep: #8A82B5;
-    --family: #F2D9B6;       /* 家庭橙 */
+    --family: #F2D9B6;
     --family-deep: #D4A875;
-    --leisure: #A9D6E5;      /* 休闲蓝 */
+    --leisure: #A9D6E5;
     --leisure-deep: #6BAEC4;
     --shadow: 0 2px 12px rgba(180, 150, 130, 0.08);
     --shadow-soft: 0 1px 4px rgba(180, 150, 130, 0.06);
     --radius: 14px;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    line-height: 1.6;
-    font-size: 15px;
-    -webkit-font-smoothing: antialiased;
-    padding-bottom: 90px;
+    background: var(--bg); color: var(--ink); line-height: 1.6; font-size: 15px;
+    -webkit-font-smoothing: antialiased; padding-bottom: 90px;
   }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
+  .header { padding: 28px 0 16px; text-align: center; }
+  .header .date { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; letter-spacing: 1px; }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--ink); letter-spacing: 0.5px; }
+  .header .greeting { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
 
-  .wrap {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
-
-  /* ===== 顶部 ===== */
-  .header {
-    padding: 28px 0 16px;
-    text-align: center;
-  }
-  .header .date {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin-bottom: 4px;
-    letter-spacing: 1px;
-  }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--ink);
-    letter-spacing: 0.5px;
-  }
-  .header .greeting {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin-top: 6px;
-  }
-
-  /* ===== 数据条 ===== */
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin: 18px 0 22px;
-  }
-  .stat-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 14px 10px;
-    text-align: center;
-    box-shadow: var(--shadow-soft);
-  }
-  .stat-card .num {
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 2px;
-  }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 18px 0 22px; }
+  .stat-card { background: var(--card); border-radius: var(--radius); padding: 14px 10px; text-align: center; box-shadow: var(--shadow-soft); }
+  .stat-card .num { font-size: 26px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
   .stat-card .num.fire { color: var(--beauty-deep); }
   .stat-card .num.green { color: var(--health-deep); }
   .stat-card .num.purple { color: var(--growth-deep); }
-  .stat-card .label {
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 0.5px;
-  }
+  .stat-card .label { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.5px; }
 
-  /* ===== 分区标题 ===== */
   .section { margin-bottom: 26px; }
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 12px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .section-title .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
-  .section-title .count {
-    margin-left: auto;
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--ink-soft);
-  }
+  .section-title { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .section-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-title .count { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--ink-soft); }
   .section-title .count b { color: var(--ink); font-weight: 600; }
-  .section-title .more {
-    margin-left: auto;
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--beauty-deep);
-    cursor: pointer;
-  }
 
-  /* ===== 任务卡片 ===== */
   .task-list { display: flex; flex-direction: column; gap: 8px; }
-  .task-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border-radius: 12px;
-    padding: 14px 14px;
-    box-shadow: var(--shadow-soft);
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    border-left: 3px solid transparent;
-    position: relative;
-  }
+  .task-item { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 12px; padding: 14px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.15s ease; border-left: 3px solid transparent; position: relative; }
   .task-item:active { transform: scale(0.98); }
-  .task-item.done {
-    opacity: 0.55;
-    border-left-color: var(--health-deep);
-  }
+  .task-item.done { opacity: 0.55; border-left-color: var(--health-deep); }
   .task-item.done .task-name { text-decoration: line-through; }
-
-  .task-item.future {
-    cursor: default;
-    opacity: 0.85;
-    background: var(--bg);
-    border-left-color: transparent;
-  }
-  .task-item.future .check-box {
-    border-color: var(--line);
-    background: var(--line);
-  }
+  .task-item.future { cursor: default; opacity: 0.85; background: var(--bg); }
+  .task-item.future .check-box { border-color: var(--line); background: var(--line); }
   .task-item.future .check-box svg { opacity: 0; }
-
-  .task-item .del-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: var(--line);
-    color: var(--ink-soft);
-    border: none;
-    font-size: 14px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
+  .task-item .del-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: var(--line); color: var(--ink-soft); border: none; font-size: 14px; display: none; align-items: center; justify-content: center; cursor: pointer; }
   .task-item.editing .del-btn { display: flex; }
   .task-item.editing .task-progress { display: none; }
 
-  .check-box {
-    flex-shrink: 0;
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: 2px solid var(--ink-faint);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s ease;
-    background: transparent;
-  }
-  .task-item.done .check-box {
-    background: var(--health);
-    border-color: var(--health);
-  }
-  .check-box svg {
-    width: 14px; height: 14px;
-    stroke: white;
-    stroke-width: 3;
-    fill: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
+  .check-box { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-faint); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: transparent; }
+  .task-item.done .check-box { background: var(--health); border-color: var(--health); }
+  .check-box svg { width: 14px; height: 14px; stroke: white; stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.2s ease; }
   .task-item.done .check-box svg { opacity: 1; }
 
   .task-info { flex: 1; min-width: 0; }
-  .task-name {
-    font-size: 15px;
-    color: var(--ink);
-    margin-bottom: 2px;
-  }
-  .task-meta {
-    font-size: 11px;
-    color: var(--ink-soft);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .task-tag {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: 8px;
-    font-size: 10px;
-    line-height: 1.5;
-  }
+  .task-name { font-size: 15px; color: var(--ink); margin-bottom: 2px; }
+  .task-meta { font-size: 11px; color: var(--ink-soft); display: flex; gap: 8px; align-items: center; }
+  .task-tag { display: inline-block; padding: 1px 7px; border-radius: 8px; font-size: 10px; line-height: 1.5; }
   .tag-health { background: rgba(168,201,168,0.25); color: var(--health-deep); }
   .tag-beauty { background: rgba(244,182,194,0.25); color: var(--beauty-deep); }
   .tag-growth { background: rgba(184,180,217,0.25); color: var(--growth-deep); }
   .tag-family { background: rgba(242,217,182,0.3); color: var(--family-deep); }
   .tag-leisure { background: rgba(169,214,229,0.3); color: var(--leisure-deep); }
   .tag-life { background: rgba(200,188,180,0.25); color: var(--ink-soft); }
-
-  .task-progress {
-    font-size: 11px;
-    color: var(--ink-soft);
-    flex-shrink: 0;
-    padding-right: 4px;
-  }
+  .task-progress { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; padding-right: 4px; }
   .task-progress.done { color: var(--health-deep); font-weight: 600; }
-
-  /* 添加任务按钮 */
-  .add-task-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 12px;
-    border: 1.5px dashed var(--ink-faint);
-    border-radius: 12px;
-    color: var(--ink-soft);
-    font-size: 13px;
-    cursor: pointer;
-    background: transparent;
-    width: 100%;
-  }
+  .add-task-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border: 1.5px dashed var(--ink-faint); border-radius: 12px; color: var(--ink-soft); font-size: 13px; cursor: pointer; background: transparent; width: 100%; }
   .add-task-btn:active { background: var(--line); }
 
-  /* ===== 月历 ===== */
-  .calendar-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-  }
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .cal-header .month-label {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .cal-nav {
-    display: flex;
-    gap: 8px;
-  }
-  .cal-nav button {
-    background: var(--bg);
-    border: none;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    color: var(--ink-soft);
-    font-size: 14px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .calendar-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft); }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-header .month-label { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-nav button { background: var(--bg); border: none; width: 28px; height: 28px; border-radius: 50%; color: var(--ink-soft); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .cal-nav button:active { background: var(--line); }
-
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-  .cal-weekday {
-    text-align: center;
-    font-size: 10px;
-    color: var(--ink-faint);
-    padding: 4px 0;
-  }
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    border-radius: 8px;
-    font-size: 12px;
-    color: var(--ink);
-    position: relative;
-    cursor: pointer;
-  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-weekday { text-align: center; font-size: 10px; color: var(--ink-faint); padding: 4px 0; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: 8px; font-size: 12px; color: var(--ink); position: relative; cursor: pointer; }
   .cal-day.other { color: var(--ink-faint); opacity: 0.4; }
   .cal-day.today { background: var(--beauty); color: white; font-weight: 600; }
-  .cal-day.has-diary::after {
-    content: '📝';
-    position: absolute;
-    top: 1px;
-    right: 1px;
-    font-size: 8px;
-  }
-  .cal-day .rate-bar {
-    position: absolute;
-    bottom: 2px;
-    left: 20%;
-    right: 20%;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--line);
-    overflow: hidden;
-  }
-  .cal-day .rate-bar .fill {
-    height: 100%;
-    background: var(--health-deep);
-  }
+  .cal-day .rate-bar { position: absolute; bottom: 2px; left: 20%; right: 20%; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .cal-day .rate-bar .fill { height: 100%; background: var(--health-deep); }
 
-  /* ===== 心情记录 ===== */
-  .mood-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-    text-align: center;
-  }
-  .mood-card .q {
-    font-size: 14px;
-    color: var(--ink-soft);
-    margin-bottom: 12px;
-  }
-  .mood-row {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-  }
-  .mood-btn {
-    font-size: 26px;
-    background: var(--bg);
-    border: none;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    filter: grayscale(0.5);
-    opacity: 0.6;
-  }
+  .mood-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft); text-align: center; }
+  .mood-card .q { font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
+  .mood-row { display: flex; justify-content: center; gap: 12px; }
+  .mood-btn { font-size: 26px; background: var(--bg); border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; transition: transform 0.15s ease; filter: grayscale(0.5); opacity: 0.6; }
   .mood-btn:active { transform: scale(1.15); }
-  .mood-btn.selected {
-    background: var(--card);
-    filter: grayscale(0);
-    opacity: 1;
-    box-shadow: var(--shadow);
-  }
+  .mood-btn.selected { background: var(--card); filter: grayscale(0); opacity: 1; box-shadow: var(--shadow); }
 
-  /* ===== 底部 Tab ===== */
-  .tabbar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid var(--line);
-    display: flex;
-    padding: 7px 0 max(7px, env(safe-area-inset-bottom));
-    z-index: 100;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 4px 0;
-    color: var(--ink-faint);
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
+  .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); display: flex; padding: 7px 0 max(7px, env(safe-area-inset-bottom)); z-index: 100; }
+  .tab { flex: 1; text-align: center; padding: 4px 0; color: var(--ink-faint); cursor: pointer; transition: color 0.2s ease; }
   .tab.active { color: var(--beauty-deep); }
   .tab .icon { font-size: 19px; line-height: 1; }
   .tab .name { font-size: 10px; margin-top: 2px; }
 
-  /* ===== 设置弹窗 ===== */
-  .modal-mask {
-    position: fixed;
-    inset: 0;
-    background: rgba(74, 63, 58, 0.4);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 20px;
-  }
+  .modal-mask { position: fixed; inset: 0; background: rgba(74, 63, 58, 0.4); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
   .modal-mask.show { display: flex; }
-  .modal {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 20px;
-    max-width: 380px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-  }
-  .modal h3 {
-    font-size: 16px;
-    margin-bottom: 14px;
-    text-align: center;
-  }
-  .modal .field {
-    margin-bottom: 12px;
-  }
-  .modal .field label {
-    display: block;
-    font-size: 12px;
-    color: var(--ink-soft);
-    margin-bottom: 4px;
-  }
-  .modal .field input,
-  .modal .field select,
-  .modal .field textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    box-sizing: border-box;
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .modal .field textarea {
-    resize: vertical;
-    min-height: 80px;
-    line-height: 1.6;
-  }
-  .modal .btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--ink);
-    font-size: 14px;
-    cursor: pointer;
-    margin-bottom: 8px;
-  }
+  .modal { background: var(--card); border-radius: var(--radius); padding: 20px; max-width: 380px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal h3 { font-size: 16px; margin-bottom: 14px; text-align: center; }
+  .modal .field { margin-bottom: 12px; }
+  .modal .field label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .modal .field input, .modal .field select, .modal .field textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; background: var(--bg); color: var(--ink); }
+  .modal .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .modal .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--bg); color: var(--ink); font-size: 14px; cursor: pointer; margin-bottom: 8px; }
   .modal .btn:active { background: var(--line); }
   .modal .btn.primary { background: var(--beauty); color: white; }
   .modal .btn.danger { background: transparent; color: var(--beauty-deep); }
-  .modal .close {
-    text-align: center;
-    color: var(--ink-soft);
-    font-size: 13px;
-    margin-top: 4px;
-    cursor: pointer;
-  }
+  .modal .close { text-align: center; color: var(--ink-soft); font-size: 13px; margin-top: 4px; cursor: pointer; }
 
-  /* ===== Toast ===== */
-  .toast {
-    position: fixed;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: rgba(74,63,58,0.92);
-    color: white;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 13px;
-    z-index: 300;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-  }
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(74,63,58,0.92); color: white; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* ===== 页面切换 ===== */
   .page { display: none; }
   .page.active { display: block; }
 
-  /* ===== 统计页 ===== */
-  .stat-block {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 12px;
-  }
-  .stat-block h4 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: var(--ink);
-  }
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-size: 12px;
-  }
+  .stat-block { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft); margin-bottom: 12px; }
+  .stat-block h4 { font-size: 14px; margin-bottom: 10px; color: var(--ink); }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
   .bar-row .name { width: 70px; color: var(--ink-soft); flex-shrink: 0; }
-  .bar-row .bar {
-    flex: 1;
-    height: 8px;
-    background: var(--line);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .bar-row .bar .fill {
-    height: 100%;
-    border-radius: 4px;
-  }
+  .bar-row .bar { flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .bar-row .bar .fill { height: 100%; border-radius: 4px; }
   .bar-row .pct { width: 36px; text-align: right; color: var(--ink-soft); }
+  .empty { text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 13px; }
 
-  .empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--ink-faint);
-    font-size: 13px;
-  }
+  /* ===== 时间轴 ===== */
+  .schedule-tabs { display: flex; gap: 0; margin-bottom: 16px; background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-soft); }
+  .schedule-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: var(--ink-soft); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s ease; }
+  .schedule-tab.active { color: var(--beauty-deep); border-bottom-color: var(--beauty-deep); font-weight: 600; }
 
-  /* ===== 日记页 ===== */
-  .diary-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 12px;
-    background: var(--card);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow-soft);
-  }
-  .diary-tab {
-    flex: 1;
-    padding: 10px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--ink-soft);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
-  }
-  .diary-tab.active {
-    color: var(--beauty-deep);
-    border-bottom-color: var(--beauty-deep);
-    font-weight: 600;
-  }
-
-  .diary-editor {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 16px;
-  }
-  .diary-editor .diary-date {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 10px;
-  }
-  .diary-editor textarea {
-    width: 100%;
-    min-height: 120px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 14px;
-    font-family: inherit;
-    line-height: 1.7;
-    resize: vertical;
-    background: var(--bg);
-    color: var(--ink);
-    box-sizing: border-box;
-  }
-  .diary-editor textarea:focus {
-    outline: none;
-    border-color: var(--beauty);
-  }
-  .diary-editor .save-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-  }
-  .diary-editor .save-row .mood-mini {
-    display: flex;
-    gap: 6px;
-  }
-  .diary-editor .save-row .mood-mini button {
-    font-size: 20px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    opacity: 0.5;
-    padding: 2px;
-  }
-  .diary-editor .save-row .mood-mini button.selected {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-  .diary-editor .save-btn {
-    background: var(--beauty);
-    color: white;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 16px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .diary-editor .save-btn:active { background: var(--beauty-deep); }
-
-  /* 图片上传区 */
-  .img-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 10px 0;
-  }
-  .img-thumb {
-    position: relative;
-    width: 72px; height: 72px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: var(--shadow-soft);
-  }
-  .img-thumb img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-  .img-thumb .img-del {
-    position: absolute;
-    top: 2px; right: 2px;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    font-size: 11px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .img-upload-btn {
-    width: 72px; height: 72px;
-    border: 1.5px dashed var(--ink-faint);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--ink-soft);
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .img-upload-btn:active { background: var(--line); }
-
-  /* AI 汇总区 */
-  .ai-section {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 16px;
-  }
-  .ai-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 10px;
-  }
-  .ai-chat {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-  }
-  .ai-msg {
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    margin-bottom: 6px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .ai-msg.user {
-    background: var(--beauty);
-    color: white;
-    margin-left: 30px;
-    border-bottom-right-radius: 2px;
-  }
-  .ai-msg.ai {
-    background: var(--bg);
-    color: var(--ink);
-    margin-right: 30px;
-    border-bottom-left-radius: 2px;
-  }
-  .ai-input-row {
-    display: flex;
-    gap: 8px;
-  }
-  .ai-input-row input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    font-size: 13px;
-    font-family: inherit;
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .ai-input-row input:focus {
-    outline: none;
-    border-color: var(--beauty);
-  }
-  .ai-input-row button {
-    background: var(--growth);
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .ai-input-row button:active { opacity: 0.8; }
-  .ai-summary-btn {
-    width: 100%;
-    padding: 10px;
-    background: linear-gradient(135deg, var(--growth), var(--growth-deep));
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-  .ai-summary-btn:active { opacity: 0.8; }
-  .ai-summary-btn:disabled { opacity: 0.4; cursor: default; }
-  .ai-hint {
-    font-size: 11px;
-    color: var(--ink-faint);
-    text-align: center;
-    margin-top: 6px;
-  }
-
-  .diary-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .diary-item {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 14px;
-    box-shadow: var(--shadow-soft);
-  }
-  .diary-item .diary-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .diary-item .diary-date-small {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .diary-item .diary-mood {
-    font-size: 18px;
-  }
-  .diary-item .diary-text {
-    font-size: 13px;
-    color: var(--ink-soft);
-    line-height: 1.7;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .diary-item .diary-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
-  }
-  .diary-item .diary-actions a {
-    font-size: 11px;
-    color: var(--beauty-deep);
-    cursor: pointer;
-  }
-  .diary-item .diary-thumbs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-  .diary-item .diary-thumbs img {
-    width: 60px; height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .diary-item .diary-thumbs .more-img {
-    width: 60px; height: 60px;
-    border-radius: 6px;
-    background: var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: var(--ink-soft);
-  }
-
-  /* 图片预览弹窗 */
-  .img-preview-mask {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 400;
-    padding: 20px;
-    cursor: pointer;
-  }
-  .img-preview-mask.show { display: flex; }
-  .img-preview-mask img {
-    max-width: 100%;
-    max-height: 90vh;
-    border-radius: 8px;
-  }
-
-  /* ===== 规划页 ===== */
-  .plan-cat-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 12px;
-  }
-  .plan-cat-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .plan-cat-header .cat-icon {
-    font-size: 18px;
-  }
-  .plan-cat-header .cat-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .plan-cat-header .cat-count {
-    margin-left: auto;
-    font-size: 11px;
-    color: var(--ink-soft);
-  }
-  .plan-task-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 4px;
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-    border-radius: 6px;
-    transition: background 0.15s ease;
-  }
-  .plan-task-row:active { background: var(--bg); }
-  .plan-task-row:last-child { border-bottom: none; }
-  .plan-task-row .pt-name { color: var(--ink); }
-  .plan-task-row .pt-freq {
-    font-size: 11px;
-    color: var(--ink-soft);
-    background: var(--bg);
-    padding: 2px 8px;
-    border-radius: 8px;
-  }
+  .timeline { position: relative; padding-left: 8px; }
+  .timeline::before { content: ''; position: absolute; left: 19px; top: 10px; bottom: 10px; width: 2px; background: var(--line); }
+  .tl-item { position: relative; display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
+  .tl-time { flex-shrink: 0; width: 44px; text-align: right; font-size: 12px; color: var(--ink-soft); padding-top: 2px; line-height: 1.3; }
+  .tl-dot { flex-shrink: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--beauty); background: var(--card); margin-top: 4px; z-index: 1; }
+  .tl-dot.done { background: var(--health-deep); border-color: var(--health-deep); }
+  .tl-card { flex: 1; background: var(--card); border-radius: 10px; padding: 12px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.15s ease; }
+  .tl-card:active { transform: scale(0.98); }
+  .tl-card .tl-title { font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+  .tl-card .tl-desc { font-size: 11px; color: var(--ink-soft); }
+  .tl-card .tl-cat { display: inline-block; padding: 1px 7px; border-radius: 8px; font-size: 10px; line-height: 1.5; margin-right: 6px; }
+  .tl-card.done .tl-title { text-decoration: line-through; opacity: 0.55; }
+  .tl-actions { display: flex; gap: 12px; margin-top: 6px; }
+  .tl-actions a { font-size: 11px; color: var(--beauty-deep); cursor: pointer; }
 </style>
 </head>
 <body>
-
 <div class="wrap">
 
   <!-- ========== 首页 ========== -->
   <div class="page active" id="page-home">
     <div class="header">
       <div class="date" id="todayDate"></div>
-      <div class="title-row" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
         <h1>我的工作台</h1>
-        <button id="refreshBtn" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px;line-height:1;" title="刷新">🔄</button>
+        <button id="refreshBtn" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px;line-height:1;">🔄</button>
       </div>
       <div class="greeting" id="greeting"></div>
     </div>
-
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="num fire" id="streakNum">0</div>
-        <div class="label">连续打卡</div>
-      </div>
-      <div class="stat-card">
-        <div class="num green" id="todayRate">0%</div>
-        <div class="label">今日完成</div>
-      </div>
-      <div class="stat-card">
-        <div class="num purple" id="weekRate">0%</div>
-        <div class="label">本周完成</div>
-      </div>
+      <div class="stat-card"><div class="num fire" id="streakNum">0</div><div class="label">连续打卡</div></div>
+      <div class="stat-card"><div class="num green" id="todayRate">0%</div><div class="label">今日完成</div></div>
+      <div class="stat-card"><div class="num purple" id="weekRate">0%</div><div class="label">本周完成</div></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--beauty-deep)"></span>
-        今日必做
-        <span class="count"><b id="dailyDone">0</b>/<span id="dailyTotal">0</span></span>
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--beauty-deep)"></span>今日必做<span class="count"><b id="dailyDone">0</b>/<span id="dailyTotal">0</span></span></div>
       <div class="task-list" id="dailyList"></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--growth-deep)"></span>
-        本周任务
-        <span class="count"><b id="weekDone">0</b>/<span id="weekTotal">0</span></span>
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--growth-deep)"></span>本周任务<span class="count"><b id="weekDone">0</b>/<span id="weekTotal">0</span></span></div>
       <div class="task-list" id="weekList"></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--family-deep)"></span>
-        本月任务
-        <span class="count"><b id="monthDone">0</b>/<span id="monthTotal">0</span></span>
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--family-deep)"></span>本月任务<span class="count"><b id="monthDone">0</b>/<span id="monthTotal">0</span></span></div>
       <div class="task-list" id="monthList"></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--leisure-deep)"></span>
-        本季度任务
-        <span class="count"><b id="quarterDone">0</b>/<span id="quarterTotal">0</span></span>
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--leisure-deep)"></span>本季度任务<span class="count"><b id="quarterDone">0</b>/<span id="quarterTotal">0</span></span></div>
       <div class="task-list" id="quarterList"></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--beauty-deep)"></span>
-        今日心情
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--beauty-deep)"></span>今日心情</div>
       <div class="mood-card">
         <div class="q">今天感觉怎么样？</div>
         <div class="mood-row" id="moodRow">
@@ -990,82 +219,38 @@
   <div class="page" id="page-calendar">
     <div class="header">
       <h1>打卡日历</h1>
-      <div class="greeting">点击日期查看完成情况 · 📝有日记</div>
+      <div class="greeting">点击日期查看完成情况</div>
     </div>
     <div class="section">
       <div class="calendar-card">
         <div class="cal-header">
           <div class="month-label" id="calMonthLabel"></div>
-          <div class="cal-nav">
-            <button id="calPrev">‹</button>
-            <button id="calNext">›</button>
-          </div>
+          <div class="cal-nav"><button id="calPrev">‹</button><button id="calNext">›</button></div>
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
     </div>
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--beauty-deep)"></span>
-        <span id="calDayLabel">选择日期查看</span>
-      </div>
-      <div class="task-list" id="calDayList">
-        <div class="empty">点击上方日期查看详情</div>
-      </div>
+      <div class="section-title"><span class="dot" style="background:var(--beauty-deep)"></span><span id="calDayLabel">选择日期查看</span></div>
+      <div class="task-list" id="calDayList"><div class="empty">点击上方日期查看详情</div></div>
     </div>
   </div>
 
-  <!-- ========== 日记页 ========== -->
-  <div class="page" id="page-diary">
+  <!-- ========== 时间轴页 ========== -->
+  <div class="page" id="page-schedule">
     <div class="header">
-      <h1>每日记录</h1>
-      <div class="greeting">写下今天的故事</div>
+      <h1>每日时间轴</h1>
+      <div class="greeting">规划你的一天</div>
     </div>
-
-    <!-- AI 汇总区 -->
-    <div class="section">
-      <div class="ai-section">
-        <div class="ai-title">✨ AI 帮你写日记</div>
-        <div class="ai-chat" id="aiChat">
-          <div class="ai-msg ai">你好！跟我说说今天发生了什么吧～可以分几次说，说完点「汇总成日记」我来帮你整理。</div>
-        </div>
-        <div class="ai-input-row">
-          <input type="text" id="aiInput" placeholder="今天做了什么、心情怎样...">
-          <button id="aiSendBtn">发送</button>
-        </div>
-        <button class="ai-summary-btn" id="aiSummaryBtn" disabled>汇总成日记</button>
-        <div class="ai-hint">说够了吗？点上面按钮我帮你整理成一篇日记</div>
-      </div>
+    <div class="schedule-tabs" id="scheduleTabs">
+      <div class="schedule-tab active" data-type="workday">工作日</div>
+      <div class="schedule-tab" data-type="restday">休息日</div>
     </div>
-
-    <!-- 日记编辑器 -->
     <div class="section">
-      <div class="diary-editor">
-        <div class="diary-date" id="diaryDateLabel"></div>
-        <textarea id="diaryText" placeholder="今天发生了什么？有什么想法？随便写写..."></textarea>
-        <!-- 图片区 -->
-        <div class="img-grid" id="diaryImgGrid"></div>
-        <div class="save-row">
-          <div class="mood-mini" id="diaryMoodRow">
-            <button data-mood="1">😢</button>
-            <button data-mood="2">😕</button>
-            <button data-mood="3">😐</button>
-            <button data-mood="4">🙂</button>
-            <button data-mood="5">😄</button>
-          </div>
-          <button class="save-btn" id="diarySaveBtn">保存</button>
-        </div>
-      </div>
+      <div class="timeline" id="timelineList"></div>
     </div>
-
     <div class="section">
-      <div class="section-title">
-        <span class="dot" style="background:var(--growth-deep)"></span>
-        历史记录
-      </div>
-      <div class="diary-list" id="diaryList">
-        <div class="empty">还没有记录，开始写第一篇吧</div>
-      </div>
+      <button class="add-task-btn" id="addScheduleBtn">+ 添加时间段</button>
     </div>
   </div>
 
@@ -1083,21 +268,19 @@
 
   <!-- ========== 设置页 ========== -->
   <div class="page" id="page-settings">
-    <div class="header">
-      <h1>设置</h1>
-    </div>
+    <div class="header"><h1>设置</h1></div>
     <div class="section">
       <div class="stat-block">
         <h4 style="margin-bottom:14px;">任务管理</h4>
-        <button class="btn primary" id="manageTasksBtn" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:8px;">编辑任务（增删改）</button>
-        <button class="btn" id="goPlanBtn" style="width:100%;padding:12px;border:none;border-radius:10px;background:var(--bg);font-size:14px;cursor:pointer;">查看总体规划</button>
+        <button class="btn primary" id="manageTasksBtn">编辑任务（增删改）</button>
+        <button class="btn" id="goPlanBtn">查看总体规划</button>
       </div>
       <div class="stat-block">
         <h4 style="margin-bottom:14px;">数据管理</h4>
-        <button class="btn primary" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:8px;" id="exportBtn">导出数据备份</button>
-        <button class="btn" style="width:100%;padding:12px;border:none;border-radius:10px;background:var(--bg);font-size:14px;cursor:pointer;margin-bottom:8px;" id="importBtn">导入数据备份</button>
+        <button class="btn primary" id="exportBtn">导出数据备份</button>
+        <button class="btn" id="importBtn">导入数据备份</button>
         <input type="file" id="importFile" accept=".json" style="display:none">
-        <button class="btn danger" style="width:100%;padding:12px;border:none;border-radius:10px;background:transparent;color:var(--beauty-deep);font-size:14px;cursor:pointer;" id="clearBtn">清空所有数据</button>
+        <button class="btn danger" id="clearBtn">清空所有数据</button>
       </div>
       <div class="stat-block">
         <h4 style="margin-bottom:10px;">关于</h4>
@@ -1113,51 +296,23 @@
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- 设置弹窗 -->
-<div class="modal-mask" id="modalMask">
-  <div class="modal" id="modalContent"></div>
-</div>
-
-<!-- Toast -->
+<div class="modal-mask" id="modalMask"><div class="modal" id="modalContent"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- 图片预览 -->
-<div class="img-preview-mask" id="imgPreviewMask">
-  <img id="imgPreviewImg" src="">
-</div>
-
-<!-- 底部 Tab -->
 <div class="tabbar">
-  <div class="tab active" data-page="home">
-    <div class="icon">🏠</div>
-    <div class="name">首页</div>
-  </div>
-  <div class="tab" data-page="calendar">
-    <div class="icon">📅</div>
-    <div class="name">日历</div>
-  </div>
-  <div class="tab" data-page="diary">
-    <div class="icon">📖</div>
-    <div class="name">记录</div>
-  </div>
-  <div class="tab" data-page="plan">
-    <div class="icon">📋</div>
-    <div class="name">规划</div>
-  </div>
-  <div class="tab" data-page="settings">
-    <div class="icon">⚙️</div>
-    <div class="name">设置</div>
-  </div>
+  <div class="tab active" data-page="home"><div class="icon">🏠</div><div class="name">首页</div></div>
+  <div class="tab" data-page="calendar"><div class="icon">📅</div><div class="name">日历</div></div>
+  <div class="tab" data-page="schedule"><div class="icon">⏰</div><div class="name">时间轴</div></div>
+  <div class="tab" data-page="plan"><div class="icon">📋</div><div class="name">规划</div></div>
+  <div class="tab" data-page="settings"><div class="icon">⚙️</div><div class="name">设置</div></div>
 </div>
 
 <script>
 // ============== 默认任务 ==============
 const DEFAULT_TASKS = [
   { id: 'sleep', name: '12点前睡觉', cat: 'health', freq: 'daily', target: 1 },
-  { id: 'record', name: '每日记录生活', cat: 'life', freq: 'daily', target: 1 },
   { id: 'meridian', name: '经络梳头', cat: 'health', freq: 'weekly', target: 3 },
   { id: 'sport', name: '运动', cat: 'health', freq: 'weekly', target: 4 },
   { id: 'makeup', name: '化妆', cat: 'beauty', freq: 'weekly', target: 3 },
@@ -1178,1079 +333,391 @@ const DEFAULT_TASKS = [
   { id: 'album', name: '整理相册', cat: 'life', freq: 'quarterly', target: 1 },
 ];
 
-const CAT_NAME = {
-  health: '健康', beauty: '形象', growth: '能力',
-  family: '家庭', leisure: '休闲', life: '生活'
-};
-const CAT_ICON = {
-  health: '🌿', beauty: '💄', growth: '📚',
-  family: '🏡', leisure: '🎬', life: '✨'
-};
-const CAT_COLOR = {
-  health: 'var(--health-deep)', beauty: 'var(--beauty-deep)',
-  growth: 'var(--growth-deep)', family: 'var(--family-deep)',
-  leisure: 'var(--leisure-deep)', life: 'var(--ink-soft)'
-};
-const FREQ_NAME = {
-  daily: '每日', weekly: '每周', monthly: '每月', quarterly: '每季度'
+// 默认时间轴
+const DEFAULT_SCHEDULE = {
+  workday: [
+    { id: 'w1', time: '07:30', title: '起床洗漱', desc: '喝杯温水，唤醒身体', cat: 'health' },
+    { id: 'w2', time: '08:00', title: '早餐 + 化妆', desc: '吃好一点，简单化妆', cat: 'beauty' },
+    { id: 'w3', time: '08:30', title: '阅读/练字', desc: '30分钟，静心开始一天', cat: 'growth' },
+    { id: 'w4', time: '09:00', title: '弹钢琴/手工', desc: '1小时兴趣时间', cat: 'growth' },
+    { id: 'w5', time: '10:00', title: '运动/家务', desc: '收拾准备，换床单等', cat: 'health' },
+    { id: 'w6', time: '11:00', title: '出门上班', desc: '通勤路上听英语/播客', cat: 'growth' },
+    { id: 'w7', time: '12:00', title: '工作开始', desc: '中午开始上班', cat: 'life' },
+    { id: 'w8', time: '21:00', title: '下班回家', desc: '通勤放松', cat: 'life' },
+    { id: 'w9', time: '22:00', title: '洗漱护肤', desc: '卸妆、面膜、经络梳头', cat: 'beauty' },
+    { id: 'w10', time: '22:30', title: '放松时间', desc: '看剧/听音乐/冥想', cat: 'leisure' },
+    { id: 'w11', time: '23:00', title: '睡觉', desc: '12点前入睡', cat: 'health' },
+  ],
+  restday: [
+    { id: 'r1', time: '08:00', title: '起床洗漱', desc: '休息日多睡一会儿', cat: 'health' },
+    { id: 'r2', time: '09:00', title: '早餐', desc: '慢慢吃，享受早晨', cat: 'life' },
+    { id: 'r3', time: '10:00', title: '运动/兴趣', desc: '弹钢琴、练字、手工', cat: 'growth' },
+    { id: 'r4', time: '12:00', title: '午餐', desc: '自己做或外出', cat: 'life' },
+    { id: 'r5', time: '14:00', title: '外出时间', desc: '美甲/看电影/逛街/拍合照', cat: 'leisure' },
+    { id: 'r6', time: '17:00', title: '家庭时间', desc: '晚餐、陪伴家人', cat: 'family' },
+    { id: 'r7', time: '19:00', title: '阅读/学英语', desc: '安静学习1小时', cat: 'growth' },
+    { id: 'r8', time: '21:00', title: '护肤时间', desc: '面膜、刮脸、去黑头', cat: 'beauty' },
+    { id: 'r9', time: '22:00', title: '放松', desc: '听音乐、冥想', cat: 'leisure' },
+    { id: 'r10', time: '23:00', title: '睡觉', desc: '12点前入睡', cat: 'health' },
+  ]
 };
 
+const CAT_NAME = { health: '健康', beauty: '形象', growth: '能力', family: '家庭', leisure: '休闲', life: '生活' };
+const CAT_COLOR = { health: 'var(--health-deep)', beauty: 'var(--beauty-deep)', growth: 'var(--growth-deep)', family: 'var(--family-deep)', leisure: 'var(--leisure-deep)', life: 'var(--ink-soft)' };
+const CAT_ICON = { health: '🌿', beauty: '💄', growth: '📚', family: '🏡', leisure: '🎬', life: '✨' };
+const FREQ_NAME = { daily: '每日', weekly: '每周', monthly: '每月', quarterly: '每季度' };
+
 // ============== 数据层 ==============
-const STORE_KEY = 'workbench_v2';
+const STORE_KEY = 'workbench_v3';
 
 function loadData() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (!raw) {
-      // 从 v1 迁移
-      const old = localStorage.getItem('workbench_v1');
+      // 从 v2 迁移
+      const old = localStorage.getItem('workbench_v2');
       if (old) {
         const oldData = JSON.parse(old);
-        return {
-          tasks: DEFAULT_TASKS,
-          records: oldData.records || {},
-          moods: oldData.moods || {},
-          diaries: {},
-          startDate: todayStr()
-        };
+        return { tasks: oldData.tasks || DEFAULT_TASKS, records: oldData.records || {}, moods: oldData.moods || {}, schedule: DEFAULT_SCHEDULE, scheduleDone: {}, startDate: todayStr() };
       }
-      return { tasks: DEFAULT_TASKS, records: {}, moods: {}, diaries: {}, startDate: todayStr() };
+      return { tasks: DEFAULT_TASKS, records: {}, moods: {}, schedule: DEFAULT_SCHEDULE, scheduleDone: {}, startDate: todayStr() };
     }
     const data = JSON.parse(raw);
     if (!data.tasks) data.tasks = DEFAULT_TASKS;
     if (!data.records) data.records = {};
     if (!data.moods) data.moods = {};
-    if (!data.diaries) data.diaries = {};
+    if (!data.schedule) data.schedule = DEFAULT_SCHEDULE;
+    if (!data.scheduleDone) data.scheduleDone = {};
     if (!data.startDate) data.startDate = todayStr();
     return data;
   } catch(e) {
-    return { tasks: DEFAULT_TASKS, records: {}, moods: {}, diaries: {}, startDate: todayStr() };
+    return { tasks: DEFAULT_TASKS, records: {}, moods: {}, schedule: DEFAULT_SCHEDULE, scheduleDone: {}, startDate: todayStr() };
   }
 }
-
-function saveData() {
-  localStorage.setItem(STORE_KEY, JSON.stringify(DB));
-}
-
+function saveData() { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
 let DB = loadData();
-// 确保 tasks 是数组
 if (!Array.isArray(DB.tasks)) DB.tasks = DEFAULT_TASKS;
-
 function getTasks() { return DB.tasks; }
 function findTask(id) { return DB.tasks.find(t => t.id === id); }
 
 // ============== 日期工具 ==============
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
-function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function dateStr(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function parseDate(s) {
-  const [y,m,d] = s.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-function weekStart(s) {
-  const d = parseDate(s);
-  const day = d.getDay() === 0 ? 6 : d.getDay() - 1;
-  d.setDate(d.getDate() - day);
-  return dateStr(d);
-}
+function todayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function dateStr(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function parseDate(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function weekStart(s) { const d = parseDate(s); const day = d.getDay() === 0 ? 6 : d.getDay() - 1; d.setDate(d.getDate() - day); return dateStr(d); }
 function monthStart(s) { return s.substring(0, 7) + '-01'; }
-function quarterStart(s) {
-  const [y, m] = s.split('-').map(Number);
-  const q = Math.floor((m - 1) / 3) * 3 + 1;
-  return `${y}-${pad(q)}-01`;
-}
-function addDays(s, n) {
-  const d = parseDate(s);
-  d.setDate(d.getDate() + n);
-  return dateStr(d);
-}
-
+function quarterStart(s) { const [y, m] = s.split('-').map(Number); const q = Math.floor((m - 1) / 3) * 3 + 1; return `${y}-${pad(q)}-01`; }
+function addDays(s, n) { const d = parseDate(s); d.setDate(d.getDate() + n); return dateStr(d); }
 function getTaskCount(taskId, refDate) {
-  const task = findTask(taskId);
-  if (!task) return 0;
-  if (task.freq === 'daily') {
-    return DB.records[taskId] && DB.records[taskId][refDate] ? 1 : 0;
-  }
-  const start = task.freq === 'weekly' ? weekStart(refDate)
-             : task.freq === 'monthly' ? monthStart(refDate)
-             : quarterStart(refDate);
+  const task = findTask(taskId); if (!task) return 0;
+  if (task.freq === 'daily') return DB.records[taskId] && DB.records[taskId][refDate] ? 1 : 0;
+  const start = task.freq === 'weekly' ? weekStart(refDate) : task.freq === 'monthly' ? monthStart(refDate) : quarterStart(refDate);
   if (!DB.records[taskId]) return 0;
-  let count = 0;
-  Object.keys(DB.records[taskId]).forEach(d => {
-    if (d >= start && d <= refDate) count++;
-  });
-  return count;
+  let count = 0; Object.keys(DB.records[taskId]).forEach(d => { if (d >= start && d <= refDate) count++; }); return count;
 }
-
 function toggleTask(taskId, date) {
   if (!DB.records[taskId]) DB.records[taskId] = {};
-  if (DB.records[taskId][date]) {
-    delete DB.records[taskId][date];
-  } else {
-    DB.records[taskId][date] = 1;
-  }
+  if (DB.records[taskId][date]) delete DB.records[taskId][date];
+  else DB.records[taskId][date] = 1;
   saveData();
 }
 
-// ============== IndexedDB 图片存储 ==============
-let imgDB = null;
-function initImgDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('workbench_images', 1);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('images')) {
-        db.createObjectStore('images', { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = (e) => { imgDB = e.target.result; resolve(imgDB); };
-    req.onerror = (e) => reject(e);
-  });
-}
-
-function saveImage(id, blob) {
-  return new Promise((resolve, reject) => {
-    if (!imgDB) return reject('DB not ready');
-    const tx = imgDB.transaction(['images'], 'readwrite');
-    const store = tx.objectStore('images');
-    store.put({ id, blob });
-    tx.oncomplete = () => resolve(id);
-    tx.onerror = (e) => reject(e);
-  });
-}
-
-function getImage(id) {
-  return new Promise((resolve, reject) => {
-    if (!imgDB) return reject('DB not ready');
-    const tx = imgDB.transaction(['images'], 'readonly');
-    const store = tx.objectStore('images');
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result ? req.result.blob : null);
-    req.onerror = (e) => reject(e);
-  });
-}
-
-function deleteImage(id) {
-  return new Promise((resolve, reject) => {
-    if (!imgDB) return reject('DB not ready');
-    const tx = imgDB.transaction(['images'], 'readwrite');
-    const store = tx.objectStore('images');
-    store.delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = (e) => reject(e);
-  });
-}
-
-function getAllImageIds() {
-  return new Promise((resolve, reject) => {
-    if (!imgDB) return reject('DB not ready');
-    const tx = imgDB.transaction(['images'], 'readonly');
-    const store = tx.objectStore('images');
-    const req = store.getAllKeys();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = (e) => reject(e);
-  });
-}
-
-// 压缩图片
-function compressImage(file, maxSize, quality) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round(height * maxSize / width);
-            width = maxSize;
-          } else {
-            width = Math.round(width * maxSize / height);
-            height = maxSize;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality || 0.7);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// ============== AI 模板汇总 ==============
-let aiMessages = []; // 用户输入的消息列表
-
-function addAiMsg(role, text) {
-  const chat = document.getElementById('aiChat');
-  const el = document.createElement('div');
-  el.className = 'ai-msg ' + role;
-  el.textContent = text;
-  chat.appendChild(el);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function generateSummary() {
-  if (aiMessages.length === 0) return '';
-
-  // 分析心情倾向
-  const allText = aiMessages.join(' ');
-  let moodWord = '平静';
-  if (/(开心|高兴|快乐|兴奋|开心|棒|好|满足|幸福|愉快)/.test(allText)) moodWord = '开心';
-  else if (/(累|烦|难过|不开心|沮丧|失落|焦虑|压力|崩溃)/.test(allText)) moodWord = '有些疲惫';
-  else if (/(生气|愤怒|气死|讨厌|无语)/.test(allText)) moodWord = '有点烦躁';
-  else if (/(感动|温暖|感谢|感恩|幸运)/.test(allText)) moodWord = '感动';
-
-  // 提取关键事项
-  const lines = aiMessages.map(m => m.trim()).filter(m => m.length > 0);
-
-  // 按标点分句，提取做了什么
-  const sentences = [];
-  lines.forEach(line => {
-    const parts = line.split(/[。！？\n；，,]/).map(s => s.trim()).filter(s => s.length > 2);
-    sentences.push(...parts);
-  });
-
-  // 分类
-  const work = sentences.filter(s => /(工作|上班|开会|项目|报告|加班|任务|完成)/.test(s));
-  const life = sentences.filter(s => /(吃|饭|睡|起|回家|出门|买|逛|做饭|收拾)/.test(s));
-  const fun = sentences.filter(s => /(看|玩|听|运动|跑步|健身|钢琴|练字|阅读|英语|手工|电影|剧)/.test(s));
-  const feeling = sentences.filter(s => /(开心|难过|累|烦|感动|想|觉得|感觉|心情)/.test(s));
-
-  let summary = `【今日心情】${moodWord}\n\n`;
-  summary += `【今天的事】\n`;
-  if (work.length > 0) summary += `工作：${work.slice(0,3).join('；')}\n`;
-  if (life.length > 0) summary += `生活：${life.slice(0,3).join('；')}\n`;
-  if (fun.length > 0) summary += `习惯：${fun.slice(0,3).join('；')}\n`;
-  if (feeling.length > 0) {
-    summary += `\n【心里话】\n${feeling.slice(0,2).join('。')}\n`;
-  }
-
-  // 生成小结
-  summary += `\n【小结】\n`;
-  if (aiMessages.length >= 3) {
-    summary += `今天比较充实，做了不少事。`;
-  } else if (aiMessages.length === 1) {
-    summary += `今天比较简单，记录了一件小事。`;
-  } else {
-    summary += `今天过得还可以，记录了几件事。`;
-  }
-  if (moodWord === '开心') summary += '整体心情不错，继续保持～';
-  else if (moodWord === '有些疲惫') summary += '有点累也没关系，明天会更好的。';
-  else if (moodWord === '有点烦躁') summary += '深呼吸，让不开心的事过去吧。';
-  else if (moodWord === '感动') summary += '感恩今天的小确幸。';
-
-  return summary;
+// 判断今天是工作日还是休息日（周日休息）
+function getTodayType() {
+  const day = new Date().getDay();
+  return day === 0 ? 'restday' : 'workday';
 }
 
 // ============== 渲染首页 ==============
-function render() {
-  renderHeader();
-  renderStats();
-  renderDaily();
-  renderWeekly();
-  renderMonthly();
-  renderQuarterly();
-  renderMood();
-}
-
+function render() { renderHeader(); renderStats(); renderDaily(); renderWeekly(); renderMonthly(); renderQuarterly(); renderMood(); }
 function renderHeader() {
-  const d = new Date();
-  const weekdays = ['日','一','二','三','四','五','六'];
+  const d = new Date(); const weekdays = ['日','一','二','三','四','五','六'];
   const months = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
-  document.getElementById('todayDate').textContent =
-    `${d.getFullYear()}年${months[d.getMonth()]}月 · 周${weekdays[d.getDay()]}`;
-  const h = d.getHours();
-  let greet = '';
-  if (h < 6) greet = '夜深了，早点休息';
-  else if (h < 11) greet = '早安，新的一天';
-  else if (h < 13) greet = '中午好，记得吃饭';
-  else if (h < 18) greet = '下午好，继续加油';
-  else if (h < 22) greet = '晚上好，今天辛苦了';
-  else greet = '快到12点了，准备睡觉';
+  document.getElementById('todayDate').textContent = `${d.getFullYear()}年${months[d.getMonth()]}月 · 周${weekdays[d.getDay()]}`;
+  const h = d.getHours(); let greet = '';
+  if (h < 6) greet = '夜深了，早点休息'; else if (h < 11) greet = '早安，新的一天';
+  else if (h < 13) greet = '中午好，记得吃饭'; else if (h < 18) greet = '下午好，继续加油';
+  else if (h < 22) greet = '晚上好，今天辛苦了'; else greet = '快到12点了，准备睡觉';
   document.getElementById('greeting').textContent = greet;
 }
-
 function renderStats() {
-  const today = todayStr();
-  const tasks = getTasks();
-  let streak = 0;
-  let cur = today;
+  const today = todayStr(); const tasks = getTasks();
+  let streak = 0, cur = today;
   while (true) {
-    const dailyTasks = tasks.filter(t => t.freq === 'daily');
-    if (dailyTasks.length === 0) break;
-    const allDone = dailyTasks.every(t => DB.records[t.id] && DB.records[t.id][cur]);
-    if (allDone) {
-      streak++;
-      cur = addDays(cur, -1);
-    } else {
-      if (cur === today) { cur = addDays(cur, -1); continue; }
-      break;
-    }
+    const dt = tasks.filter(t => t.freq === 'daily');
+    if (dt.length === 0) break;
+    if (dt.every(t => DB.records[t.id] && DB.records[t.id][cur])) { streak++; cur = addDays(cur, -1); }
+    else { if (cur === today) { cur = addDays(cur, -1); continue; } break; }
     if (streak > 365) break;
   }
   document.getElementById('streakNum').textContent = streak;
-
-  const dailyTasks = tasks.filter(t => t.freq === 'daily');
-  const todayDone = dailyTasks.filter(t => DB.records[t.id] && DB.records[t.id][today]).length;
-  document.getElementById('todayRate').textContent =
-    dailyTasks.length > 0 ? Math.round(todayDone / dailyTasks.length * 100) + '%' : '0%';
-
-  const ws = weekStart(today);
-  let weekTotal = 0, weekDone = 0;
-  tasks.filter(t => t.freq === 'weekly').forEach(t => {
-    weekTotal += t.target;
-    weekDone += Math.min(getTaskCount(t.id, today), t.target);
-  });
-  tasks.filter(t => t.freq === 'daily').forEach(t => {
-    for (let i = 0; i < 7; i++) {
-      const d = addDays(ws, i);
-      if (d <= today) {
-        weekTotal++;
-        if (DB.records[t.id] && DB.records[t.id][d]) weekDone++;
-      }
-    }
-  });
-  document.getElementById('weekRate').textContent =
-    weekTotal > 0 ? Math.round(weekDone / weekTotal * 100) + '%' : '0%';
+  const dt = tasks.filter(t => t.freq === 'daily');
+  const td = dt.filter(t => DB.records[t.id] && DB.records[t.id][today]).length;
+  document.getElementById('todayRate').textContent = dt.length > 0 ? Math.round(td / dt.length * 100) + '%' : '0%';
+  const ws = weekStart(today); let wt = 0, wd = 0;
+  tasks.filter(t => t.freq === 'weekly').forEach(t => { wt += t.target; wd += Math.min(getTaskCount(t.id, today), t.target); });
+  tasks.filter(t => t.freq === 'daily').forEach(t => { for (let i = 0; i < 7; i++) { const d = addDays(ws, i); if (d <= today) { wt++; if (DB.records[t.id] && DB.records[t.id][d]) wd++; } } });
+  document.getElementById('weekRate').textContent = wt > 0 ? Math.round(wd / wt * 100) + '%' : '0%';
 }
-
 function renderTaskList(containerId, freq, label) {
-  const today = todayStr();
-  const tasks = getTasks().filter(t => t.freq === freq);
-  const list = document.getElementById(containerId);
-  list.innerHTML = '';
-  let done = 0;
-
-  if (tasks.length === 0) {
-    list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>';
-    return;
-  }
-
+  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq);
+  const list = document.getElementById(containerId); list.innerHTML = ''; let done = 0;
+  if (tasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
   tasks.forEach(t => {
-    let isDone, progressText, count = 0;
-    if (freq === 'daily') {
-      isDone = DB.records[t.id] && DB.records[t.id][today];
-      progressText = '';
-    } else {
-      count = getTaskCount(t.id, today);
-      isDone = count >= t.target;
-      progressText = `${count}/${t.target}`;
-    }
+    let isDone, progressText;
+    if (freq === 'daily') { isDone = DB.records[t.id] && DB.records[t.id][today]; progressText = ''; }
+    else { const count = getTaskCount(t.id, today); isDone = count >= t.target; progressText = `${count}/${t.target}`; }
     if (isDone) done++;
-
-    // 已完成目标次数的任务不显示（每日任务当天完成也隐藏）
     if (isDone) return;
-
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '');
-    el.innerHTML = `
-      <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div>
-      <div class="task-info">
-        <div class="task-name">${t.name}</div>
-        <div class="task-meta">
-          <span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span>
-          <span>${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span>
-        </div>
-      </div>
-      ${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}
-      <button class="del-btn" data-id="${t.id}">✕</button>
-    `;
-    el.querySelector('.check-box').parentElement.onclick = (e) => {
-      if (e.target.classList.contains('del-btn')) return;
-      toggleTask(t.id, today);
-      render();
-    };
-    const delBtn = el.querySelector('.del-btn');
-    if (delBtn) {
-      delBtn.onclick = (e) => {
-        e.stopPropagation();
-        showDeleteTask(t);
-      };
-    }
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}<button class="del-btn" data-id="${t.id}">✕</button>`;
+    el.querySelector('.check-box').parentElement.onclick = (e) => { if (e.target.classList.contains('del-btn')) return; toggleTask(t.id, today); render(); };
+    const delBtn = el.querySelector('.del-btn'); if (delBtn) { delBtn.onclick = (e) => { e.stopPropagation(); showDeleteTask(t); }; }
     list.appendChild(el);
   });
-
-  const doneKey = freq === 'daily' ? 'dailyDone' : freq === 'weekly' ? 'weekDone'
-                : freq === 'monthly' ? 'monthDone' : 'quarterDone';
-  const totalKey = freq === 'daily' ? 'dailyTotal' : freq === 'weekly' ? 'weekTotal'
-                 : freq === 'monthly' ? 'monthTotal' : 'quarterTotal';
-  document.getElementById(doneKey).textContent = done;
-  document.getElementById(totalKey).textContent = tasks.length;
-
-  // 全部完成时显示一句鼓励
-  if (done === tasks.length && tasks.length > 0) {
-    const msgs = ['全部完成！太棒了 🎉', '今日已清空，厉害 💪', '都搞定啦，休息一下吧 ✨'];
-    const el = document.createElement('div');
-    el.className = 'empty';
-    el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-    list.appendChild(el);
-  }
+  const doneKey = freq === 'daily' ? 'dailyDone' : freq === 'weekly' ? 'weekDone' : freq === 'monthly' ? 'monthDone' : 'quarterDone';
+  const totalKey = freq === 'daily' ? 'dailyTotal' : freq === 'weekly' ? 'weekTotal' : freq === 'monthly' ? 'monthTotal' : 'quarterTotal';
+  document.getElementById(doneKey).textContent = done; document.getElementById(totalKey).textContent = tasks.length;
+  if (done === tasks.length && tasks.length > 0) { const el = document.createElement('div'); el.className = 'empty'; el.textContent = ['全部完成！太棒了 🎉','今日已清空，厉害 💪','都搞定啦，休息一下吧 ✨'][Math.floor(Math.random()*3)]; list.appendChild(el); }
 }
-
 function renderDaily() { renderTaskList('dailyList', 'daily', '每天'); }
 function renderWeekly() { renderTaskList('weekList', 'weekly', '本周'); }
 function renderMonthly() { renderTaskList('monthList', 'monthly', '本月'); }
 function renderQuarterly() { renderTaskList('quarterList', 'quarterly', '本季度'); }
-
 function renderMood() {
-  const today = todayStr();
-  const cur = DB.moods[today];
-  document.querySelectorAll('#moodRow .mood-btn').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.dataset.mood) === cur);
-  });
+  const today = todayStr(); const cur = DB.moods[today];
+  document.querySelectorAll('#moodRow .mood-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.mood) === cur));
 }
 
 // ============== 日历 ==============
-let calRef = new Date();
-let calSelected = todayStr();
-
+let calRef = new Date(); let calSelected = todayStr();
 function renderCalendar() {
-  const y = calRef.getFullYear();
-  const m = calRef.getMonth();
+  const y = calRef.getFullYear(); const m = calRef.getMonth();
   const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   document.getElementById('calMonthLabel').textContent = `${y}年 ${months[m]}`;
-
-  const firstDay = new Date(y, m, 1);
-  const lastDay = new Date(y, m + 1, 0);
+  const firstDay = new Date(y, m, 1); const lastDay = new Date(y, m + 1, 0);
   const startWeekday = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-  const daysInMonth = lastDay.getDate();
-  const today = todayStr();
-
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-
-  ['一','二','三','四','五','六','日'].forEach(w => {
-    const el = document.createElement('div');
-    el.className = 'cal-weekday';
-    el.textContent = w;
-    grid.appendChild(el);
-  });
-
-  for (let i = 0; i < startWeekday; i++) {
-    const d = new Date(y, m, -startWeekday + i + 1);
-    const el = document.createElement('div');
-    el.className = 'cal-day other';
-    el.textContent = d.getDate();
-    grid.appendChild(el);
-  }
-
+  const daysInMonth = lastDay.getDate(); const today = todayStr();
+  const grid = document.getElementById('calGrid'); grid.innerHTML = '';
+  ['一','二','三','四','五','六','日'].forEach(w => { const el = document.createElement('div'); el.className = 'cal-weekday'; el.textContent = w; grid.appendChild(el); });
+  for (let i = 0; i < startWeekday; i++) { const d = new Date(y, m, -startWeekday + i + 1); const el = document.createElement('div'); el.className = 'cal-day other'; el.textContent = d.getDate(); grid.appendChild(el); }
   for (let i = 1; i <= daysInMonth; i++) {
-    const ds = `${y}-${pad(m+1)}-${pad(i)}`;
-    const el = document.createElement('div');
-    el.className = 'cal-day';
-    if (ds === today) el.classList.add('today');
+    const ds = `${y}-${pad(m+1)}-${pad(i)}`; const el = document.createElement('div');
+    el.className = 'cal-day'; if (ds === today) el.classList.add('today');
     if (ds === calSelected && ds !== today) el.style.background = 'var(--line)';
     el.textContent = i;
-
-    if (DB.diaries[ds]) el.classList.add('has-diary');
-
     if (ds <= today) {
-      const dailyTasks = getTasks().filter(t => t.freq === 'daily');
-      const done = dailyTasks.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length;
-      const rate = dailyTasks.length > 0 ? done / dailyTasks.length : 0;
-      if (rate > 0) {
-        const bar = document.createElement('div');
-        bar.className = 'rate-bar';
-        const fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = (rate * 100) + '%';
-        bar.appendChild(fill);
-        el.appendChild(bar);
-      }
+      const dt = getTasks().filter(t => t.freq === 'daily');
+      const done = dt.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length;
+      const rate = dt.length > 0 ? done / dt.length : 0;
+      if (rate > 0) { const bar = document.createElement('div'); bar.className = 'rate-bar'; const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = (rate * 100) + '%'; bar.appendChild(fill); el.appendChild(bar); }
     }
-    el.onclick = () => {
-      calSelected = ds;
-      renderCalendar();
-      renderCalDay();
-    };
+    el.onclick = () => { calSelected = ds; renderCalendar(); renderCalDay(); };
     grid.appendChild(el);
   }
-
-  const total = startWeekday + daysInMonth;
-  const remain = (7 - total % 7) % 7;
-  for (let i = 1; i <= remain; i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day other';
-    el.textContent = i;
-    grid.appendChild(el);
-  }
-
+  const total = startWeekday + daysInMonth; const remain = (7 - total % 7) % 7;
+  for (let i = 1; i <= remain; i++) { const el = document.createElement('div'); el.className = 'cal-day other'; el.textContent = i; grid.appendChild(el); }
   renderCalDay();
 }
-
 function renderCalDay() {
-  const label = document.getElementById('calDayLabel');
-  const list = document.getElementById('calDayList');
-  const d = parseDate(calSelected);
-  const weekdays = ['日','一','二','三','四','五','六'];
-  const today = todayStr();
-  const isFuture = calSelected > today;
+  const label = document.getElementById('calDayLabel'); const list = document.getElementById('calDayList');
+  const d = parseDate(calSelected); const weekdays = ['日','一','二','三','四','五','六'];
+  const today = todayStr(); const isFuture = calSelected > today;
   label.textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}`;
-
-  list.innerHTML = '';
-  const tasks = getTasks();
-  if (tasks.length === 0) {
-    list.innerHTML = '<div class="empty">暂无任务</div>';
-    return;
-  }
-
-  // 过滤掉已完成（达标）的任务
-  const visibleTasks = tasks.filter(t => {
-    if (t.freq === 'daily') {
-      // 每日任务：当天完成则隐藏
-      const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
-      return !isDone;
-    } else {
-      // 周期任务：当前周期已达标则隐藏
-      const count = getTaskCount(t.id, calSelected);
-      return count < t.target;
-    }
+  list.innerHTML = ''; const tasks = getTasks();
+  if (tasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务</div>'; return; }
+  const visible = tasks.filter(t => {
+    if (t.freq === 'daily') { return !(!isFuture && DB.records[t.id] && DB.records[t.id][calSelected]); }
+    return getTaskCount(t.id, calSelected) < t.target;
   });
-
-  if (visibleTasks.length === 0) {
-    list.innerHTML = '<div class="empty">✨ 全部完成！</div>';
-    return;
-  }
-
-  visibleTasks.forEach(t => {
+  if (visible.length === 0) { list.innerHTML = '<div class="empty">✨ 全部完成！</div>'; return; }
+  visible.forEach(t => {
     const isDone = !isFuture && DB.records[t.id] && DB.records[t.id][calSelected];
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '') + (isFuture ? ' future' : '');
-    const freqText = FREQ_NAME[t.freq] + (t.target > 1 ? ' '+t.target+'次' : '');
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div></div>`;
+    if (!isFuture) { el.onclick = () => { toggleTask(t.id, calSelected); renderCalendar(); renderCalDay(); render(); }; }
+    list.appendChild(el);
+  });
+}
+
+// ============== 时间轴 ==============
+let scheduleType = 'workday';
+function renderSchedule() {
+  // 自动判断今天类型
+  scheduleType = getTodayType();
+  document.querySelectorAll('.schedule-tab').forEach(t => t.classList.toggle('active', t.dataset.type === scheduleType));
+  renderTimeline();
+}
+function renderTimeline() {
+  const list = document.getElementById('timelineList');
+  const items = DB.schedule[scheduleType] || [];
+  list.innerHTML = '';
+  if (items.length === 0) { list.innerHTML = '<div class="empty">暂无安排，点击下方添加</div>'; return; }
+  // 按时间排序
+  items.sort((a, b) => a.time.localeCompare(b.time));
+  const today = todayStr();
+  const doneKey = today + '_' + scheduleType;
+  const doneItems = DB.scheduleDone[doneKey] || [];
+  items.forEach(item => {
+    const isDone = doneItems.includes(item.id);
+    const el = document.createElement('div');
+    el.className = 'tl-item';
     el.innerHTML = `
-      <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div>
-      <div class="task-info">
-        <div class="task-name">${t.name}</div>
-        <div class="task-meta">
-          <span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span>
-          <span>${freqText}</span>
+      <div class="tl-time">${item.time}</div>
+      <div class="tl-dot ${isDone ? 'done' : ''}"></div>
+      <div class="tl-card ${isDone ? 'done' : ''}">
+        <div class="tl-title">${item.title}</div>
+        <div class="tl-desc"><span class="tl-cat tag-${item.cat}">${CAT_NAME[item.cat]}</span>${item.desc || ''}</div>
+        <div class="tl-actions">
+          <a data-action="toggle">✓ 完成</a>
+          <a data-action="edit">编辑</a>
+          <a data-action="delete">删除</a>
         </div>
       </div>
     `;
-    if (!isFuture) {
-      el.onclick = () => {
-        toggleTask(t.id, calSelected);
-        renderCalendar();
-        renderCalDay();
-        render();
-      };
-    }
+    el.querySelector('[data-action="toggle"]').onclick = () => toggleScheduleDone(item.id);
+    el.querySelector('[data-action="edit"]').onclick = () => showEditSchedule(item);
+    el.querySelector('[data-action="delete"]').onclick = () => deleteSchedule(item);
     list.appendChild(el);
   });
 }
-
-// ============== 日记 ==============
-let diaryEditingDate = todayStr();
-let diaryEditingMood = 0;
-
-// 当前编辑日记的临时图片ID列表
-let diaryEditingImages = [];
-
-async function renderDiary() {
-  const d = parseDate(diaryEditingDate);
-  const weekdays = ['日','一','二','三','四','五','六'];
-  document.getElementById('diaryDateLabel').textContent =
-    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}`;
-
-  const existing = DB.diaries[diaryEditingDate];
-  document.getElementById('diaryText').value = existing ? existing.text : '';
-  diaryEditingMood = existing ? existing.mood : (DB.moods[diaryEditingDate] || 0);
-  diaryEditingImages = existing && existing.images ? [...existing.images] : [];
-
-  document.querySelectorAll('#diaryMoodRow button').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.dataset.mood) === diaryEditingMood);
-  });
-
-  await renderDiaryImages();
-  renderDiaryList();
-  resetAiChat();
+function toggleScheduleDone(itemId) {
+  const today = todayStr();
+  const doneKey = today + '_' + scheduleType;
+  if (!DB.scheduleDone[doneKey]) DB.scheduleDone[doneKey] = [];
+  const idx = DB.scheduleDone[doneKey].indexOf(itemId);
+  if (idx >= 0) DB.scheduleDone[doneKey].splice(idx, 1);
+  else DB.scheduleDone[doneKey].push(itemId);
+  saveData();
+  renderTimeline();
 }
-
-async function renderDiaryImages() {
-  const grid = document.getElementById('diaryImgGrid');
-  grid.innerHTML = '';
-  // 已有图片
-  for (const imgId of diaryEditingImages) {
-    const blob = await getImage(imgId);
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      const el = document.createElement('div');
-      el.className = 'img-thumb';
-      el.innerHTML = `<img src="${url}" data-id="${imgId}"><button class="img-del" data-id="${imgId}">✕</button>`;
-      el.querySelector('img').onclick = () => previewImage(url);
-      el.querySelector('.img-del').onclick = async (e) => {
-        e.stopPropagation();
-        await deleteImage(imgId);
-        diaryEditingImages = diaryEditingImages.filter(x => x !== imgId);
-        // 如果日记已保存，更新
-        if (DB.diaries[diaryEditingDate]) {
-          DB.diaries[diaryEditingDate].images = [...diaryEditingImages];
-          saveData();
-        }
-        renderDiaryImages();
-        toast('图片已删除');
-      };
-      grid.appendChild(el);
-    }
-  }
-  // 上传按钮
-  const uploadBtn = document.createElement('button');
-  uploadBtn.className = 'img-upload-btn';
-  uploadBtn.textContent = '+';
-  uploadBtn.onclick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.multiple = true;
-    input.onchange = async (e) => {
-      const files = Array.from(e.target.files);
-      for (const file of files) {
-        const blob = await compressImage(file, 1200, 0.7);
-        const imgId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-        await saveImage(imgId, blob);
-        diaryEditingImages.push(imgId);
-      }
-      // 如果日记已保存，更新图片关联
-      if (DB.diaries[diaryEditingDate]) {
-        DB.diaries[diaryEditingDate].images = [...diaryEditingImages];
-        saveData();
-      }
-      renderDiaryImages();
-      toast(files.length > 1 ? `已添加${files.length}张图片` : '图片已添加');
-    };
-    input.click();
+function showEditSchedule(prefill) {
+  const catOptions = Object.keys(CAT_NAME).map(c => `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`).join('');
+  showModal(`
+    <h3>${prefill ? '编辑时间段' : '添加时间段'}</h3>
+    <div class="field"><label>时间</label><input type="time" id="schTimeInput" value="${prefill ? prefill.time : '08:00'}"></div>
+    <div class="field"><label>标题</label><input type="text" id="schTitleInput" value="${prefill ? prefill.title : ''}" placeholder="如：练字"></div>
+    <div class="field"><label>描述（选填）</label><input type="text" id="schDescInput" value="${prefill ? prefill.desc || '' : ''}" placeholder="备注"></div>
+    <div class="field"><label>分类</label><select id="schCatInput">${catOptions}</select></div>
+    <button class="btn primary" id="saveSchBtn">保存</button>
+    <div class="close" onclick="closeModal()">取消</div>
+  `);
+  document.getElementById('saveSchBtn').onclick = () => {
+    const time = document.getElementById('schTimeInput').value;
+    const title = document.getElementById('schTitleInput').value.trim();
+    const desc = document.getElementById('schDescInput').value.trim();
+    const cat = document.getElementById('schCatInput').value;
+    if (!time || !title) { toast('请填写时间和标题'); return; }
+    if (prefill) { const item = DB.schedule[scheduleType].find(s => s.id === prefill.id); if (item) { item.time = time; item.title = title; item.desc = desc; item.cat = cat; } }
+    else { DB.schedule[scheduleType].push({ id: 's_' + Date.now(), time, title, desc, cat }); }
+    saveData(); closeModal(); renderTimeline();
+    toast(prefill ? '已更新' : '已添加');
   };
-  grid.appendChild(uploadBtn);
 }
-
-function previewImage(url) {
-  document.getElementById('imgPreviewImg').src = url;
-  document.getElementById('imgPreviewMask').classList.add('show');
-}
-
-function resetAiChat() {
-  aiMessages = [];
-  const chat = document.getElementById('aiChat');
-  chat.innerHTML = '<div class="ai-msg ai">你好！跟我说说今天发生了什么吧～可以分几次说，说完点「汇总成日记」我来帮你整理。</div>';
-  document.getElementById('aiInput').value = '';
-  document.getElementById('aiSummaryBtn').disabled = true;
-}
-
-function renderDiaryList() {
-  const list = document.getElementById('diaryList');
-  const dates = Object.keys(DB.diaries).sort().reverse();
-  if (dates.length === 0) {
-    list.innerHTML = '<div class="empty">还没有记录，开始写第一篇吧</div>';
-    return;
-  }
-  list.innerHTML = '';
-  const moodEmojis = ['', '😢','😕','😐','🙂','😄'];
-  dates.forEach(date => {
-    const diary = DB.diaries[date];
-    const d = parseDate(date);
-    const weekdays = ['日','一','二','三','四','五','六'];
-    const el = document.createElement('div');
-    el.className = 'diary-item';
-    el.innerHTML = `
-      <div class="diary-top">
-        <div class="diary-date-small">${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}</div>
-        <div class="diary-mood">${diary.mood ? moodEmojis[diary.mood] : ''}</div>
-      </div>
-      <div class="diary-text">${escapeHtml(diary.text)}</div>
-      <div class="diary-thumbs" id="thumbs_${date}"></div>
-      <div class="diary-actions">
-        <a data-action="edit" data-date="${date}">编辑</a>
-        <a data-action="delete" data-date="${date}">删除</a>
-      </div>
-    `;
-    // 加载缩略图
-    if (diary.images && diary.images.length > 0) {
-      const thumbContainer = el.querySelector('#thumbs_' + date);
-      diary.images.slice(0, 4).forEach(async (imgId, idx) => {
-        const blob = await getImage(imgId);
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const imgEl = document.createElement('img');
-          imgEl.src = url;
-          imgEl.onclick = () => previewImage(url);
-          thumbContainer.appendChild(imgEl);
-        }
-      });
-      if (diary.images.length > 4) {
-        const more = document.createElement('div');
-        more.className = 'more-img';
-        more.textContent = '+' + (diary.images.length - 4);
-        thumbContainer.appendChild(more);
-      }
-    }
-    el.querySelector('[data-action="edit"]').onclick = () => {
-      diaryEditingDate = date;
-      renderDiary();
-      window.scrollTo(0, 0);
-    };
-    el.querySelector('[data-action="delete"]').onclick = () => {
-      showModal(`
-        <h3>删除日记</h3>
-        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">确定删除 ${date} 的日记吗？<br>日记内容和图片都会删除。</p>
-        <button class="btn danger" id="confirmDelDiary" style="background:var(--beauty-deep);color:white;">确认删除</button>
-        <div class="close" onclick="closeModal()">取消</div>
-      `);
-      document.getElementById('confirmDelDiary').onclick = async () => {
-        // 删除关联图片
-        if (DB.diaries[date].images) {
-          for (const imgId of DB.diaries[date].images) {
-            await deleteImage(imgId);
-          }
-        }
-        delete DB.diaries[date];
-        saveData();
-        closeModal();
-        renderDiary();
-        renderCalendar();
-        toast('日记已删除');
-      };
-    };
-    list.appendChild(el);
-  });
-}
-
-function escapeHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function deleteSchedule(item) {
+  showModal(`<h3>删除时间段</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">确定删除「${item.time} ${item.title}」吗？</p><button class="btn danger" id="confirmDelSch" style="background:var(--beauty-deep);color:white;">确认删除</button><div class="close" onclick="closeModal()">取消</div>`);
+  document.getElementById('confirmDelSch').onclick = () => {
+    DB.schedule[scheduleType] = DB.schedule[scheduleType].filter(s => s.id !== item.id);
+    saveData(); closeModal(); renderTimeline(); toast('已删除');
+  };
 }
 
 // ============== 规划页 ==============
 function renderPlan() {
-  const container = document.getElementById('planContainer');
-  container.innerHTML = '';
-  const tasks = getTasks();
-  const cats = ['health','beauty','growth','family','leisure','life'];
-
+  const container = document.getElementById('planContainer'); container.innerHTML = '';
+  const tasks = getTasks(); const cats = ['health','beauty','growth','family','leisure','life'];
   cats.forEach(cat => {
     const catTasks = tasks.filter(t => t.cat === cat);
     if (catTasks.length === 0) return;
-    const el = document.createElement('div');
-    el.className = 'plan-cat-card';
+    const el = document.createElement('div'); el.className = 'plan-cat-card';
     let rows = '';
     catTasks.forEach(t => {
-      const freqText = FREQ_NAME[t.freq] + (t.target > 1 ? ' '+t.target+'次' : '');
-      rows += `
-        <div class="plan-task-row" data-task-id="${t.id}" style="cursor:pointer;">
-          <span class="pt-name">${t.name}</span>
-          <span class="pt-freq">${freqText}</span>
-        </div>
-      `;
+      rows += `<div class="plan-task-row" data-task-id="${t.id}" style="cursor:pointer;"><span class="pt-name">${t.name}</span><span class="pt-freq">${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div>`;
     });
-    el.innerHTML = `
-      <div class="plan-cat-header">
-        <span class="cat-icon">${CAT_ICON[cat]}</span>
-        <span class="cat-name">${CAT_NAME[cat]}</span>
-        <span class="cat-count">${catTasks.length} 项</span>
-      </div>
-      ${rows}
-    `;
-    // 绑定点击编辑
-    el.querySelectorAll('.plan-task-row').forEach(row => {
-      row.onclick = () => {
-        const task = findTask(row.dataset.taskId);
-        if (task) showDeleteTask(task);
-      };
-    });
+    el.innerHTML = `<div class="plan-cat-header"><span class="cat-icon">${CAT_ICON[cat]}</span><span class="cat-name">${CAT_NAME[cat]}</span><span class="cat-count">${catTasks.length} 项</span></div>${rows}`;
+    el.querySelectorAll('.plan-task-row').forEach(row => { row.onclick = () => { const task = findTask(row.dataset.taskId); if (task) showDeleteTask(task); }; });
     container.appendChild(el);
   });
 }
 
-// ============== 任务管理（增删改） ==============
+// ============== 任务管理 ==============
 function showAddTaskModal(prefill) {
-  const catOptions = Object.keys(CAT_NAME).map(c =>
-    `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`
-  ).join('');
-  const freqOptions = Object.keys(FREQ_NAME).map(f =>
-    `<option value="${f}" ${prefill && prefill.freq === f ? 'selected' : ''}>${FREQ_NAME[f]}</option>`
-  ).join('');
-  showModal(`
-    <h3>${prefill ? '编辑任务' : '添加任务'}</h3>
-    <div class="field">
-      <label>任务名称</label>
-      <input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字">
-    </div>
-    <div class="field">
-      <label>分类</label>
-      <select id="taskCatInput">${catOptions}</select>
-    </div>
-    <div class="field">
-      <label>频率</label>
-      <select id="taskFreqInput">${freqOptions}</select>
-    </div>
-    <div class="field">
-      <label>目标次数（每日默认1）</label>
-      <input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30">
-    </div>
-    <button class="btn primary" id="saveTaskBtn">保存</button>
-    <div class="close" onclick="closeModal()">取消</div>
-  `);
-  // 频率改变时调整默认次数
-  document.getElementById('taskFreqInput').onchange = (e) => {
-    const targetInput = document.getElementById('taskTargetInput');
-    if (e.target.value === 'daily') targetInput.value = 1;
-    else if (e.target.value === 'weekly') targetInput.value = targetInput.value < 2 ? 3 : targetInput.value;
-  };
+  const catOptions = Object.keys(CAT_NAME).map(c => `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`).join('');
+  const freqOptions = Object.keys(FREQ_NAME).map(f => `<option value="${f}" ${prefill && prefill.freq === f ? 'selected' : ''}>${FREQ_NAME[f]}</option>`).join('');
+  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field"><label>目标次数</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30"></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
+  document.getElementById('taskFreqInput').onchange = (e) => { const ti = document.getElementById('taskTargetInput'); if (e.target.value === 'daily') ti.value = 1; else if (ti.value < 2) ti.value = 3; };
   document.getElementById('saveTaskBtn').onclick = () => {
     const name = document.getElementById('taskNameInput').value.trim();
     if (!name) { toast('请输入任务名称'); return; }
-    const cat = document.getElementById('taskCatInput').value;
-    const freq = document.getElementById('taskFreqInput').value;
+    const cat = document.getElementById('taskCatInput').value; const freq = document.getElementById('taskFreqInput').value;
     const target = Math.max(1, parseInt(document.getElementById('taskTargetInput').value) || 1);
-
-    if (prefill) {
-      // 编辑
-      const task = findTask(prefill.id);
-      if (task) {
-        task.name = name;
-        task.cat = cat;
-        task.freq = freq;
-        task.target = target;
-      }
-    } else {
-      // 新增
-      const newId = 't_' + Date.now();
-      DB.tasks.push({ id: newId, name, cat, freq, target });
-    }
-    saveData();
-    closeModal();
-    render();
-    renderPlan();
-    toast(prefill ? '任务已更新' : '任务已添加');
+    if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.cat = cat; task.freq = freq; task.target = target; } }
+    else { DB.tasks.push({ id: 't_' + Date.now(), name, cat, freq, target }); }
+    saveData(); closeModal(); render(); renderPlan(); toast(prefill ? '任务已更新' : '任务已添加');
   };
 }
-
 function showDeleteTask(task) {
-  showModal(`
-    <h3>删除任务</h3>
-    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">确定删除「${task.name}」吗？<br>相关的打卡记录也会保留不会被删除。</p>
-    <button class="btn danger" id="confirmDelTask" style="background:var(--beauty-deep);color:white;">确认删除</button>
-    <button class="btn" id="editTaskBtn" style="background:var(--bg);">编辑任务</button>
-    <div class="close" onclick="closeModal()">取消</div>
-  `);
-  document.getElementById('confirmDelTask').onclick = () => {
-    DB.tasks = DB.tasks.filter(t => t.id !== task.id);
-    saveData();
-    closeModal();
-    render();
-    renderPlan();
-    toast('任务已删除');
-  };
-  document.getElementById('editTaskBtn').onclick = () => {
-    closeModal();
-    showAddTaskModal(task);
-  };
+  showModal(`<h3>删除任务</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">确定删除「${task.name}」吗？</p><button class="btn danger" id="confirmDelTask" style="background:var(--beauty-deep);color:white;">确认删除</button><button class="btn" id="editTaskBtn" style="background:var(--bg);">编辑任务</button><div class="close" onclick="closeModal()">取消</div>`);
+  document.getElementById('confirmDelTask').onclick = () => { DB.tasks = DB.tasks.filter(t => t.id !== task.id); saveData(); closeModal(); render(); renderPlan(); toast('任务已删除'); };
+  document.getElementById('editTaskBtn').onclick = () => { closeModal(); showAddTaskModal(task); };
 }
 
 // ============== 统计 ==============
 function renderStatsPage() {
-  const today = todayStr();
-  const start30 = addDays(today, -29);
-  const container = document.getElementById('taskStats');
-  container.innerHTML = '';
-  const tasks = getTasks();
-
-  tasks.forEach(t => {
+  const today = todayStr(); const start30 = addDays(today, -29);
+  const container = document.getElementById('taskStats'); container.innerHTML = '';
+  getTasks().forEach(t => {
     let total = 0, done = 0;
-    if (t.freq === 'daily') {
-      let cur = start30;
-      while (cur <= today) {
-        total++;
-        if (DB.records[t.id] && DB.records[t.id][cur]) done++;
-        cur = addDays(cur, 1);
-      }
-    } else {
-      let cur = start30;
-      while (cur <= today) {
-        const count = getTaskCount(t.id, cur);
-        total++;
-        if (count >= t.target) done++;
-        cur = addDays(cur, 7);
-      }
-    }
+    if (t.freq === 'daily') { let cur = start30; while (cur <= today) { total++; if (DB.records[t.id] && DB.records[t.id][cur]) done++; cur = addDays(cur, 1); } }
+    else { let cur = start30; while (cur <= today) { total++; if (getTaskCount(t.id, cur) >= t.target) done++; cur = addDays(cur, 7); } }
     const pct = total > 0 ? Math.round(done / total * 100) : 0;
-    const el = document.createElement('div');
-    el.className = 'bar-row';
-    el.innerHTML = `
-      <div class="name">${t.name}</div>
-      <div class="bar"><div class="fill" style="width:${pct}%;background:${CAT_COLOR[t.cat]}"></div></div>
-      <div class="pct">${pct}%</div>
-    `;
+    const el = document.createElement('div'); el.className = 'bar-row';
+    el.innerHTML = `<div class="name">${t.name}</div><div class="bar"><div class="fill" style="width:${pct}%;background:${CAT_COLOR[t.cat]}"></div></div><div class="pct">${pct}%</div>`;
     container.appendChild(el);
   });
-
-  const ms = monthStart(today);
-  const monthTasks = tasks.filter(t => t.freq === 'monthly');
-  let mDone = 0;
-  monthTasks.forEach(t => { if (getTaskCount(t.id, today) >= t.target) mDone++; });
-  const mTotal = monthTasks.length;
-  const dailyTasks = tasks.filter(t => t.freq === 'daily');
-  let dDays = 0;
-  let cur = ms;
-  while (cur <= today) {
-    if (dailyTasks.every(t => DB.records[t.id] && DB.records[t.id][cur])) dDays++;
-    cur = addDays(cur, 1);
-  }
-  const todayDate = parseDate(today);
-  const dayOfMonth = todayDate.getDate();
-
+  const ms = monthStart(today); const monthTasks = getTasks().filter(t => t.freq === 'monthly');
+  let mDone = 0; monthTasks.forEach(t => { if (getTaskCount(t.id, today) >= t.target) mDone++; });
+  const mTotal = monthTasks.length; const dailyTasks = getTasks().filter(t => t.freq === 'daily');
+  let dDays = 0; let cur = ms;
+  while (cur <= today) { if (dailyTasks.every(t => DB.records[t.id] && DB.records[t.id][cur])) dDays++; cur = addDays(cur, 1); }
+  const dayOfMonth = parseDate(today).getDate();
   document.getElementById('monthOverview').innerHTML = `
-    <div class="bar-row">
-      <div class="name">每日打卡</div>
-      <div class="bar"><div class="fill" style="width:${dayOfMonth > 0 ? Math.round(dDays/dayOfMonth*100) : 0}%;background:var(--beauty-deep)"></div></div>
-      <div class="pct">${dDays}/${dayOfMonth}</div>
-    </div>
-    <div class="bar-row">
-      <div class="name">月度任务</div>
-      <div class="bar"><div class="fill" style="width:${mTotal > 0 ? Math.round(mDone/mTotal*100) : 0}%;background:var(--family-deep)"></div></div>
-      <div class="pct">${mDone}/${mTotal}</div>
-    </div>
-    <div class="bar-row">
-      <div class="name">日记篇数</div>
-      <div class="bar"><div class="fill" style="width:${Math.min(100,Math.round(Object.keys(DB.diaries).length/dayOfMonth*100))}%;background:var(--growth-deep)"></div></div>
-      <div class="pct">${Object.keys(DB.diaries).length}篇</div>
-    </div>
+    <div class="bar-row"><div class="name">每日打卡</div><div class="bar"><div class="fill" style="width:${dayOfMonth>0?Math.round(dDays/dayOfMonth*100):0}%;background:var(--beauty-deep)"></div></div><div class="pct">${dDays}/${dayOfMonth}</div></div>
+    <div class="bar-row"><div class="name">月度任务</div><div class="bar"><div class="fill" style="width:${mTotal>0?Math.round(mDone/mTotal*100):0}%;background:var(--family-deep)"></div></div><div class="pct">${mDone}/${mTotal}</div></div>
   `;
-
-  const badges = document.getElementById('badges');
-  badges.innerHTML = '';
+  const badges = document.getElementById('badges'); badges.innerHTML = '';
   const streak = parseInt(document.getElementById('streakNum').textContent) || 0;
-  const diaryCount = Object.keys(DB.diaries).length;
   const allBadges = [
     { icon: '🌱', name: '7天', unlock: streak >= 7 },
     { icon: '🌿', name: '30天', unlock: streak >= 30 },
     { icon: '🌳', name: '100天', unlock: streak >= 100 },
     { icon: '🏆', name: '全勤月', unlock: dDays === dayOfMonth && dayOfMonth > 0 },
     { icon: '🎯', name: '月度全满', unlock: mDone === mTotal && mTotal > 0 },
-    { icon: '✍️', name: '日记7篇', unlock: diaryCount >= 7 },
-    { icon: '📚', name: '日记30篇', unlock: diaryCount >= 30 },
   ];
-  allBadges.forEach(b => {
-    const el = document.createElement('div');
-    el.style.cssText = `text-align:center;opacity:${b.unlock ? 1 : 0.25};filter:${b.unlock ? 'none' : 'grayscale(1)'};`;
-    el.innerHTML = `<div style="font-size:28px;">${b.icon}</div><div style="font-size:10px;color:var(--ink-soft);margin-top:2px;">${b.name}</div>`;
-    badges.appendChild(el);
-  });
+  allBadges.forEach(b => { const el = document.createElement('div'); el.style.cssText = `text-align:center;opacity:${b.unlock?1:0.25};filter:${b.unlock?'none':'grayscale(1)'};`; el.innerHTML = `<div style="font-size:28px;">${b.icon}</div><div style="font-size:10px;color:var(--ink-soft);margin-top:2px;">${b.name}</div>`; badges.appendChild(el); });
 }
 
 // ============== 弹窗 & Toast ==============
-function showModal(html) {
-  document.getElementById('modalContent').innerHTML = html;
-  document.getElementById('modalMask').classList.add('show');
-}
-function closeModal() {
-  document.getElementById('modalMask').classList.remove('show');
-}
-document.getElementById('modalMask').addEventListener('click', e => {
-  if (e.target.id === 'modalMask') closeModal();
-});
-
+function showModal(html) { document.getElementById('modalContent').innerHTML = html; document.getElementById('modalMask').classList.add('show'); }
+function closeModal() { document.getElementById('modalMask').classList.remove('show'); }
+document.getElementById('modalMask').addEventListener('click', e => { if (e.target.id === 'modalMask') closeModal(); });
 let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
-}
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2000); }
 
 // ============== 事件绑定 ==============
-// 心情（首页）
 document.querySelectorAll('#moodRow .mood-btn').forEach(b => {
-  b.onclick = () => {
-    const m = parseInt(b.dataset.mood);
-    const today = todayStr();
-    if (DB.moods[today] === m) delete DB.moods[today];
-    else DB.moods[today] = m;
-    saveData();
-    renderMood();
-    toast(DB.moods[today] ? '心情已记录' : '已取消');
-  };
+  b.onclick = () => { const m = parseInt(b.dataset.mood); const today = todayStr(); if (DB.moods[today] === m) delete DB.moods[today]; else DB.moods[today] = m; saveData(); renderMood(); toast(DB.moods[today] ? '心情已记录' : '已取消'); };
 });
+document.getElementById('refreshBtn').onclick = () => location.reload(true);
 
-// 日记心情
-document.querySelectorAll('#diaryMoodRow button').forEach(b => {
-  b.onclick = () => {
-    diaryEditingMood = parseInt(b.dataset.mood);
-    document.querySelectorAll('#diaryMoodRow button').forEach(x => x.classList.remove('selected'));
-    b.classList.add('selected');
-  };
+// 时间轴 Tab 切换
+document.querySelectorAll('.schedule-tab').forEach(tab => {
+  tab.onclick = () => { scheduleType = tab.dataset.type; document.querySelectorAll('.schedule-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderTimeline(); };
 });
-
-// 保存日记
-document.getElementById('diarySaveBtn').onclick = () => {
-  const text = document.getElementById('diaryText').value.trim();
-  if (!text && diaryEditingImages.length === 0) { toast('写点什么或添加图片再保存吧'); return; }
-  DB.diaries[diaryEditingDate] = { text, mood: diaryEditingMood, images: [...diaryEditingImages] };
-  if (diaryEditingMood > 0) {
-    DB.moods[diaryEditingDate] = diaryEditingMood;
-  }
-  saveData();
-  renderDiary();
-  renderCalendar();
-  toast('日记已保存 ✍️');
-};
-
-// AI 发送
-document.getElementById('aiSendBtn').onclick = () => {
-  const input = document.getElementById('aiInput');
-  const text = input.value.trim();
-  if (!text) return;
-  aiMessages.push(text);
-  addAiMsg('user', text);
-  input.value = '';
-  document.getElementById('aiSummaryBtn').disabled = false;
-  // AI 简单回复
-  const replies = [
-    '嗯嗯，还有吗？继续说～',
-    '收到！再补充点？',
-    '记下了，还有什么想说的？',
-    '好的，说完了吗？说完点「汇总成日记」',
-    '了解了～继续聊聊？',
-  ];
-  setTimeout(() => addAiMsg('ai', replies[Math.floor(Math.random()*replies.length)]), 300);
-};
-document.getElementById('aiInput').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') document.getElementById('aiSendBtn').click();
-});
-
-// AI 汇总
-document.getElementById('aiSummaryBtn').onclick = () => {
-  if (aiMessages.length === 0) { toast('先说点什么再汇总吧'); return; }
-  const summary = generateSummary();
-  document.getElementById('diaryText').value = summary;
-  // 自动检测心情
-  const allText = aiMessages.join('');
-  if (/(开心|高兴|快乐|兴奋|棒|满足|幸福|愉快)/.test(allText)) diaryEditingMood = 5;
-  else if (/(感动|温暖|感谢|感恩)/.test(allText)) diaryEditingMood = 4;
-  else if (/(累|烦|难过|不开心|沮丧|焦虑|压力)/.test(allText)) diaryEditingMood = 2;
-  else if (/(生气|愤怒|气死|讨厌)/.test(allText)) diaryEditingMood = 1;
-  else diaryEditingMood = 3;
-  document.querySelectorAll('#diaryMoodRow button').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.dataset.mood) === diaryEditingMood);
-  });
-  toast('已汇总到日记，可以编辑后保存');
-  // 滚动到编辑器
-  document.querySelector('.diary-editor').scrollIntoView({ behavior: 'smooth' });
-};
-
-// 图片预览关闭
-document.getElementById('imgPreviewMask').onclick = () => {
-  document.getElementById('imgPreviewMask').classList.remove('show');
-};
+document.getElementById('addScheduleBtn').onclick = () => showEditSchedule(null);
 
 // 页面切换
 document.querySelectorAll('.tab').forEach(tab => {
@@ -2262,180 +729,66 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.getElementById('page-' + page).classList.add('active');
     window.scrollTo(0, 0);
     if (page === 'calendar') renderCalendar();
-    if (page === 'diary') renderDiary();
+    if (page === 'schedule') renderSchedule();
     if (page === 'plan') renderPlan();
     if (page === 'stats') renderStatsPage();
   };
 });
 
-// 日历导航
-document.getElementById('calPrev').onclick = () => {
-  calRef.setMonth(calRef.getMonth() - 1);
-  renderCalendar();
-};
-document.getElementById('calNext').onclick = () => {
-  calRef.setMonth(calRef.getMonth() + 1);
-  renderCalendar();
-};
-
-// 任务管理入口
+document.getElementById('calPrev').onclick = () => { calRef.setMonth(calRef.getMonth() - 1); renderCalendar(); };
+document.getElementById('calNext').onclick = () => { calRef.setMonth(calRef.getMonth() + 1); renderCalendar(); };
 document.getElementById('planAddTaskBtn').onclick = () => showAddTaskModal(null);
 document.getElementById('manageTasksBtn').onclick = () => {
-  showModal(`
-    <h3>编辑任务</h3>
-    <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">点击任务可编辑或删除</p>
-    <div id="taskEditList" style="max-height:300px;overflow-y:auto;"></div>
-    <button class="btn primary" id="addNewTaskFromManage">+ 添加新任务</button>
-    <div class="close" onclick="closeModal()">关闭</div>
-  `);
+  showModal(`<h3>编辑任务</h3><p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">点击任务可编辑或删除</p><div id="taskEditList" style="max-height:300px;overflow-y:auto;"></div><button class="btn primary" id="addNewTaskFromManage">+ 添加新任务</button><div class="close" onclick="closeModal()">关闭</div>`);
   const listEl = document.getElementById('taskEditList');
   getTasks().forEach(t => {
     const el = document.createElement('div');
     el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--line);cursor:pointer;';
-    el.innerHTML = `
-      <div>
-        <div style="font-size:14px;">${t.name}</div>
-        <div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</div>
-      </div>
-      <span style="color:var(--ink-faint);">›</span>
-    `;
-    el.onclick = () => {
-      closeModal();
-      showDeleteTask(t);
-    };
+    el.innerHTML = `<div><div style="font-size:14px;">${t.name}</div><div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</div></div><span style="color:var(--ink-faint);">›</span>`;
+    el.onclick = () => { closeModal(); showDeleteTask(t); };
     listEl.appendChild(el);
   });
-  document.getElementById('addNewTaskFromManage').onclick = () => {
-    closeModal();
-    showAddTaskModal(null);
-  };
+  document.getElementById('addNewTaskFromManage').onclick = () => { closeModal(); showAddTaskModal(null); };
 };
-
-// 设置页跳转
-document.getElementById('goPlanBtn').onclick = () => {
-  document.querySelector('.tab[data-page="plan"]').click();
-};
+document.getElementById('goPlanBtn').onclick = () => document.querySelector('.tab[data-page="plan"]').click();
 
 // 数据管理
-document.getElementById('exportBtn').onclick = async () => {
-  toast('正在准备备份（含图片）...');
-  // 导出图片数据
-  const imgIds = await getAllImageIds();
-  const imagesData = {};
-  for (const id of imgIds) {
-    const blob = await getImage(id);
-    if (blob) {
-      // blob 转 base64
-      const base64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-      imagesData[id] = base64;
-    }
-  }
-  const exportData = { ...DB, imagesData };
-  const data = JSON.stringify(exportData);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `工作台备份_${todayStr()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('备份已下载（含' + imgIds.length + '张图片）');
+document.getElementById('exportBtn').onclick = () => {
+  const data = JSON.stringify(DB); const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = `工作台备份_${todayStr()}.json`; a.click(); URL.revokeObjectURL(url); toast('备份已下载');
 };
-
-document.getElementById('importBtn').onclick = () => {
-  document.getElementById('importFile').click();
-};
+document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
 document.getElementById('importFile').onchange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
+  const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
   reader.onload = (ev) => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (!data.records) throw new Error('格式错误');
-      showModal(`
-        <h3>确认导入</h3>
-        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">导入后将覆盖当前数据，是否继续？</p>
-        <button class="btn primary" id="confirmImport">确认导入</button>
-        <div class="close" onclick="closeModal()">取消</div>
-      `);
-      document.getElementById('confirmImport').onclick = async () => {
-        const imagesData = data.imagesData;
-        delete data.imagesData;
-        DB = data;
-        if (!DB.tasks) DB.tasks = DEFAULT_TASKS;
-        if (!DB.moods) DB.moods = {};
-        if (!DB.diaries) DB.diaries = {};
-        saveData();
-        // 恢复图片
-        if (imagesData) {
-          for (const [id, base64] of Object.entries(imagesData)) {
-            const blob = await (await fetch(base64)).blob();
-            await saveImage(id, blob);
-          }
-        }
-        closeModal();
-        render();
-        renderPlan();
-        if (document.getElementById('page-diary').classList.contains('active')) renderDiary();
-        toast('数据导入成功');
+      const data = JSON.parse(ev.target.result); if (!data.records) throw new Error('格式错误');
+      showModal(`<h3>确认导入</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">导入后将覆盖当前数据，是否继续？</p><button class="btn primary" id="confirmImport">确认导入</button><div class="close" onclick="closeModal()">取消</div>`);
+      document.getElementById('confirmImport').onclick = () => {
+        DB = data; if (!DB.tasks) DB.tasks = DEFAULT_TASKS; if (!DB.moods) DB.moods = {}; if (!DB.schedule) DB.schedule = DEFAULT_SCHEDULE; if (!DB.scheduleDone) DB.scheduleDone = {};
+        saveData(); closeModal(); render(); renderPlan(); toast('数据导入成功');
       };
     } catch(err) { toast('文件格式错误'); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
+  }; reader.readAsText(file); e.target.value = '';
 };
-
 document.getElementById('clearBtn').onclick = () => {
-  showModal(`
-    <h3>清空所有数据</h3>
-    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">此操作不可恢复！建议先导出备份。<br>确定要清空所有数据吗？</p>
-    <button class="btn danger" id="confirmClear" style="background:var(--beauty-deep);color:white;">确认清空</button>
-    <div class="close" onclick="closeModal()">取消</div>
-  `);
+  showModal(`<h3>清空所有数据</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">此操作不可恢复！建议先导出备份。<br>确定要清空所有数据吗？</p><button class="btn danger" id="confirmClear" style="background:var(--beauty-deep);color:white;">确认清空</button><div class="close" onclick="closeModal()">取消</div>`);
   document.getElementById('confirmClear').onclick = () => {
-    DB = { tasks: DEFAULT_TASKS, records: {}, moods: {}, diaries: {}, startDate: todayStr() };
-    saveData();
-    closeModal();
-    render();
-    renderPlan();
-    toast('已清空所有数据');
+    DB = { tasks: DEFAULT_TASKS, records: {}, moods: {}, schedule: DEFAULT_SCHEDULE, scheduleDone: {}, startDate: todayStr() };
+    saveData(); closeModal(); render(); renderPlan(); toast('已清空所有数据');
   };
-};
-
-// 刷新按钮：绕过缓存重新加载页面
-document.getElementById('refreshBtn').onclick = () => {
-  location.reload(true);
 };
 
 // ============== 启动 ==============
-initImgDB().then(() => {
-  render();
-}).catch(() => {
-  render();
-});
-
-// 注册 Service Worker，实现 PWA 自动更新
+render();
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/daka/sw.js')
-    .then(reg => {
-      // 检查更新
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // 发现新版本，自动刷新页面
-            newWorker.postMessage({ type: 'SKIP_WAITING' });
-            window.location.reload();
-          }
-        });
-      });
-    })
-    .catch(err => console.log('SW 注册失败:', err));
+  navigator.serviceWorker.register('/daka/sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => { if (nw.state === 'installed' && navigator.serviceWorker.controller) { nw.postMessage({ type: 'SKIP_WAITING' }); window.location.reload(); } });
+    });
+  }).catch(() => {});
 }
 </script>
 </body>
