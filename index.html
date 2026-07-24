@@ -234,8 +234,8 @@ const DEFAULT_TASKS = [
   { id: 'makeup', name: '化妆', cat: 'beauty', freq: 'weekly', target: 2, time: '08:15', days: [1, 4] },
   { id: 'reading', name: '阅读', cat: 'growth', freq: 'weekly', target: 2, time: '09:00', days: [6, 7] },
   { id: 'sport', name: '运动', cat: 'health', freq: 'weekly', target: 2, time: '22:30', days: [3, 7] },
-  { id: 'piano', name: '弹钢琴', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [6] },
-  { id: 'craft', name: '手工', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [7] },
+  { id: 'piano', name: '弹钢琴', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [6], biweek: 0 },
+  { id: 'craft', name: '手工', cat: 'growth', freq: 'weekly', target: 1, time: '14:00', days: [7], biweek: 1 },
   // 每月（3项）
   { id: 'nail', name: '美甲', cat: 'beauty', freq: 'monthly', target: 1, time: '14:00', days: [1] },
   { id: 'photo', name: '拍合照', cat: 'family', freq: 'monthly', target: 1, time: '17:00', days: [15] },
@@ -259,8 +259,8 @@ function loadData() {
     }
     const data = JSON.parse(raw);
     if (!data.tasks) data.tasks = DEFAULT_TASKS;
-    // 给旧任务补 time / days 字段
-    data.tasks.forEach(t => { if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; } if (t.freq !== 'daily' && !t.days) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.days) t.days = d.days; else t.days = []; } });
+    // 给旧任务补 time / days / biweek 字段
+    data.tasks.forEach(t => { if (!t.time) { const d = DEFAULT_TASKS.find(x => x.id === t.id); t.time = d ? d.time : '08:00'; } if (t.freq !== 'daily' && !t.days) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.days) t.days = d.days; else t.days = []; } if (t.freq === 'weekly' && t.biweek === undefined) { const d = DEFAULT_TASKS.find(x => x.id === t.id); if (d && d.biweek !== undefined) t.biweek = d.biweek; } });
     if (!data.records) data.records = {};
     if (!data.moods) data.moods = {};
     return data;
@@ -294,19 +294,33 @@ function getTaskCount(taskId, refDate) {
 }
 function toggleTask(taskId, date) { if (!DB.records[taskId]) DB.records[taskId] = {}; if (DB.records[taskId][date]) delete DB.records[taskId][date]; else DB.records[taskId][date] = 1; saveData(); }
 
-// 判断某任务在某日期是否应该显示（根据days规则）
+// 计算某日期是第几周（从 startDate 起算），用于双周交替
+function getWeekIndex(date) {
+  const start = DB.startDate ? parseDate(DB.startDate) : parseDate('2026-01-05'); // 2026年第一个周一
+  const d = parseDate(date);
+  const diff = Math.floor((d - start) / (7 * 24 * 60 * 60 * 1000));
+  return diff;
+}
+
+// 判断某任务在某日期是否应该显示（根据days规则 + 双周交替）
 function shouldTaskShowOnDate(task, date) {
   if (task.freq === 'daily') return true;
   const d = parseDate(date);
   if (getTaskCount(task.id, date) >= task.target) return false;
   if (!task.days || task.days.length === 0) return true; // 未设置days则每天都显示
-  if (task.freq === 'weekly') return task.days.includes(d.getDay() === 0 ? 7 : d.getDay());
+  if (task.freq === 'weekly') {
+    if (!task.days.includes(d.getDay() === 0 ? 7 : d.getDay())) return false;
+    // 双周交替：biweek=0 偶数周显示，biweek=1 奇数周显示
+    if (task.biweek !== undefined) return getWeekIndex(date) % 2 === task.biweek;
+    return true;
+  }
   if (task.freq === 'monthly') return task.days.includes(d.getDate());
   if (task.freq === 'quarterly') return task.days.includes(d.getDate());
   return true;
 }
 function daysText(task) {
-  if (task.freq === 'weekly') return '周' + task.days.map(d => ['日','一','二','三','四','五','六'][d === 7 ? 0 : d]).join('、');
+  const biweekNote = task.biweek !== undefined ? '（隔周）' : '';
+  if (task.freq === 'weekly') return '周' + task.days.map(d => ['日','一','二','三','四','五','六'][d === 7 ? 0 : d]).join('、') + biweekNote;
   if (task.freq === 'monthly') return '每月' + task.days.join('、') + '号';
   if (task.freq === 'quarterly') return '每季度' + task.days.join('、') + '号';
   return '';
@@ -491,16 +505,26 @@ function showAddTaskModal(prefill) {
   const catOptions = Object.keys(CAT_NAME).map(c => `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`).join('');
   const freqOptions = Object.keys(FREQ_NAME).map(f => `<option value="${f}" ${prefill && prefill.freq === f ? 'selected' : ''}>${FREQ_NAME[f]}</option>`).join('');
   const initFreq = prefill ? prefill.freq : 'daily';
-  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field"><label>时间</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field" id="targetField"><label>目标次数${initFreq==='daily'?'（每日固定1次）':''}</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30" ${initFreq==='daily'?'disabled':''}></div><div class="field" id="daysField"><label id="daysLabel">设置周期</label><div id="daysContainer">${buildDaysSelector(initFreq, prefill ? prefill.days : null)}</div></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
+  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field"><label>时间</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field" id="targetField"><label>目标次数${initFreq==='daily'?'（每日固定1次）':''}</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30" ${initFreq==='daily'?'disabled':''}></div><div class="field" id="daysField"><label id="daysLabel">设置周期</label><div id="daysContainer">${buildDaysSelector(initFreq, prefill ? prefill.days : null)}</div><div id="biweekField" style="margin-top:10px;display:${initFreq==='weekly'?'block':'none'};"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--ink-soft);"><input type="checkbox" id="biweekToggle" ${prefill && prefill.biweek !== undefined ? 'checked' : ''} style="width:16px;height:16px;">隔周交替（适合两个任务轮流）</label><div id="biweekHint" style="font-size:11px;color:var(--ink-faint);margin-top:4px;display:${prefill && prefill.biweek !== undefined ? 'block':'none'};">选 A 组这周做、B 组下周做，需在另一个任务上也勾选</div></div></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
   document.getElementById('taskFreqInput').onchange = (e) => {
     const freq = e.target.value;
     const ti = document.getElementById('taskTargetInput');
     const df = document.getElementById('daysField');
     const dl = document.getElementById('daysLabel');
     const tfl = document.querySelector('#targetField label');
+    const bwf = document.getElementById('biweekField');
     if (freq === 'daily') { ti.value = 1; ti.disabled = true; df.style.display = 'none'; if(tfl) tfl.textContent = '目标次数（每日固定1次）'; }
-    else { ti.disabled = false; if (ti.value < 2) ti.value = 3; df.style.display = 'block'; if(tfl) tfl.textContent = '目标次数'; dl.textContent = freq === 'weekly' ? '设置周几（可多选）' : '设置几号（可多选）'; document.getElementById('daysContainer').innerHTML = buildDaysSelector(freq, null); bindDayChips(); }
+    else { ti.disabled = false; if (ti.value < 2) ti.value = 3; df.style.display = 'block'; if(tfl) tfl.textContent = '目标次数'; dl.textContent = freq === 'weekly' ? '设置周几（可多选）' : '设置几号（可多选）'; document.getElementById('daysContainer').innerHTML = buildDaysSelector(freq, null); bindDayChips(); bwf.style.display = freq === 'weekly' ? 'block' : 'none'; }
   };
+  document.getElementById('biweekToggle').onchange = (e) => {
+    const hint = document.getElementById('biweekHint');
+    if (e.target.checked) {
+      hint.style.display = 'block';
+      hint.innerHTML = `选 A 组这周做、B 组下周做，另一个交替任务选不同组<div style="display:flex;gap:10px;margin-top:6px;"><label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink);cursor:pointer;"><input type="radio" name="biweekGroup" value="0" ${prefill && prefill.biweek === 0 ? 'checked' : (!prefill || prefill.biweek === undefined) ? 'checked' : ''} style="width:14px;height:14px;">A 组（偶数周）</label><label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink);cursor:pointer;"><input type="radio" name="biweekGroup" value="1" ${prefill && prefill.biweek === 1 ? 'checked' : ''} style="width:14px;height:14px;">B 组（奇数周）</label></div>`;
+    } else { hint.style.display = 'none'; }
+  };
+  // 如果 prefill 已有 biweek，初始化显示
+  if (prefill && prefill.biweek !== undefined) { document.getElementById('biweekToggle').onchange({ target: { checked: true } }); }
   function bindDayChips() {
     document.querySelectorAll('.day-chip').forEach(chip => {
       chip.onclick = () => {
@@ -520,8 +544,11 @@ function showAddTaskModal(prefill) {
     const target = Math.max(1, parseInt(document.getElementById('taskTargetInput').value) || 1);
     const days = freq !== 'daily' ? getSelectedDays() : undefined;
     if (freq !== 'daily' && days.length === 0) { toast('请设置周期（周几或几号）'); return; }
-    if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.time = time; task.cat = cat; task.freq = freq; task.target = target; if (freq !== 'daily') task.days = days; else delete task.days; } }
-    else { const nt = { id: 't_' + Date.now(), name, time, cat, freq, target }; if (freq !== 'daily') nt.days = days; DB.tasks.push(nt); }
+    const biweekChecked = document.getElementById('biweekToggle') && document.getElementById('biweekToggle').checked;
+    let biweek = undefined;
+    if (biweekChecked && freq === 'weekly') { const bg = document.querySelector('input[name="biweekGroup"]:checked'); biweek = bg ? parseInt(bg.value) : 0; }
+    if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.time = time; task.cat = cat; task.freq = freq; task.target = target; if (freq !== 'daily') task.days = days; else delete task.days; if (biweek !== undefined) task.biweek = biweek; else delete task.biweek; } }
+    else { const nt = { id: 't_' + Date.now(), name, time, cat, freq, target }; if (freq !== 'daily') nt.days = days; if (biweek !== undefined) nt.biweek = biweek; DB.tasks.push(nt); }
     saveData(); closeModal(); render(); renderPlan(); toast(prefill ? '任务已更新' : '任务已添加');
   };
 }
