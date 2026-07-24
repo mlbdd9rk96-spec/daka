@@ -1529,16 +1529,20 @@ function renderTaskList(containerId, freq, label) {
   }
 
   tasks.forEach(t => {
-    let isDone, progressText;
+    let isDone, progressText, count = 0;
     if (freq === 'daily') {
       isDone = DB.records[t.id] && DB.records[t.id][today];
       progressText = '';
     } else {
-      const count = getTaskCount(t.id, today);
+      count = getTaskCount(t.id, today);
       isDone = count >= t.target;
       progressText = `${count}/${t.target}`;
     }
     if (isDone) done++;
+
+    // 已完成目标次数的任务不显示（每日任务当天完成也隐藏）
+    if (isDone) return;
+
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '');
     el.innerHTML = `
@@ -1574,6 +1578,15 @@ function renderTaskList(containerId, freq, label) {
                  : freq === 'monthly' ? 'monthTotal' : 'quarterTotal';
   document.getElementById(doneKey).textContent = done;
   document.getElementById(totalKey).textContent = tasks.length;
+
+  // 全部完成时显示一句鼓励
+  if (done === tasks.length && tasks.length > 0) {
+    const msgs = ['全部完成！太棒了 🎉', '今日已清空，厉害 💪', '都搞定啦，休息一下吧 ✨'];
+    const el = document.createElement('div');
+    el.className = 'empty';
+    el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    list.appendChild(el);
+  }
 }
 
 function renderDaily() { renderTaskList('dailyList', 'daily', '每天'); }
