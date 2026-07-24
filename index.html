@@ -134,6 +134,17 @@
   .plan-task-row:last-child { border-bottom: none; }
   .plan-task-row .pt-name { color: var(--ink); }
   .plan-task-row .pt-freq { font-size: 11px; color: var(--ink-soft); background: var(--bg); padding: 2px 8px; border-radius: 8px; }
+  /* 智能调整 */
+  .smart-bar { background: var(--card); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow-soft); }
+  .smart-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--growth-deep); cursor: pointer; }
+  .smart-input-row { display: flex; gap: 8px; margin-top: 10px; }
+  .smart-input-row input { flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--ink); }
+  .smart-input-row button { padding: 0 16px; border: none; border-radius: 8px; background: var(--growth-deep); color: white; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .smart-preview { font-size: 12px; color: var(--ink-soft); margin-top: 8px; padding: 8px 10px; background: var(--bg); border-radius: 8px; line-height: 1.5; }
+  .smart-preview b { color: var(--growth-deep); }
+  .smart-active { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--growth-deep); }
+  .smart-active .tag { background: rgba(184,180,217,0.2); padding: 2px 8px; border-radius: 8px; }
+  .smart-active .cancel { margin-left: auto; color: var(--beauty-deep); cursor: pointer; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -152,6 +163,7 @@
       <div class="stat-card"><div class="num green" id="todayRate">0%</div><div class="label">今日完成</div></div>
       <div class="stat-card"><div class="num purple" id="weekRate">0%</div><div class="label">本周完成</div></div>
     </div>
+    <div id="smartAdjustBar" style="margin-bottom:12px;"></div>
     <div class="section">
       <div class="section-title"><span class="dot" style="background:var(--beauty-deep)"></span>今日必做<span class="count"><b id="dailyDone">0</b>/<span id="dailyTotal">0</span></span></div>
       <div class="task-list" id="dailyList"></div>
@@ -264,12 +276,12 @@ function loadData() {
         const old = localStorage.getItem(oldKey);
         if (old) {
           const o = JSON.parse(old);
-          const migrated = { tasks: DEFAULT_TASKS, records: o.records || {}, moods: o.moods || {}, startDate: o.startDate || todayStr() };
+          const migrated = { tasks: DEFAULT_TASKS, records: o.records || {}, moods: o.moods || {}, overrides: {}, startDate: o.startDate || todayStr() };
           localStorage.setItem(STORE_KEY, JSON.stringify(migrated)); // 写入新 key
           return migrated;
         }
       }
-      return { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() };
+      return { tasks: DEFAULT_TASKS, records: {}, moods: {}, overrides: {}, startDate: todayStr() };
     }
     const data = JSON.parse(raw);
     if (!data.tasks) data.tasks = DEFAULT_TASKS;
@@ -281,6 +293,7 @@ function loadData() {
     });
     if (!data.records) data.records = {};
     if (!data.moods) data.moods = {};
+    if (!data.overrides) data.overrides = {};
     return data;
   } catch(e) { return { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() }; }
 }
@@ -337,7 +350,141 @@ function daysText(task) {
   return '';
 }
 
-function render() { renderHeader(); renderStats(); renderDaily(); renderWeekly(); renderMonthly(); renderQuarterly(); renderMood(); }
+// ========== 智能调整（本地规则匹配）==========
+const REST_CATS = ['leisure']; // 休闲类：休息日才做
+const WORK_CATS = []; // 没有严格的工作日专属分类
+const CORE_IDS = ['wash', 'breakfast', 'sleep']; // 核心：出差也保留
+
+// 获取某日的调整规则
+function getOverride(date) { return DB.overrides && DB.overrides[date] ? DB.overrides[date] : null; }
+
+// 判断某任务在 override 下是否应该显示
+function applyOverride(task, date) {
+  const ov = getOverride(date);
+  if (!ov) return true;
+  if (ov.type === 'workday') {
+    // 休息日变工作日：隐藏休闲类
+    if (REST_CATS.includes(task.cat)) return false;
+    return true;
+  }
+  if (ov.type === 'restday') {
+    // 工作日变休息日：所有任务正常显示（休息日不做工作日专属的，目前没有）
+    return true;
+  }
+  if (ov.type === 'busy') {
+    // 出差/忙碌：只保留核心
+    return CORE_IDS.includes(task.id);
+  }
+  return true;
+}
+
+// 综合判断：days 规则 + override
+function shouldShowTask(task, date) {
+  if (!shouldTaskShowOnDate(task, date)) return false;
+  if (!applyOverride(task, date)) return false;
+  return true;
+}
+
+// 解析用户输入
+function parseUserInput(text) {
+  const today = todayStr(); const todayDate = new Date();
+  let targetDate = null;
+  let type = null, endTime = null;
+
+  // 日期识别
+  if (/今天|今日/.test(text)) targetDate = today;
+  else if (/明天|明日/.test(text)) targetDate = addDays(today, 1);
+  else if (/后天/.test(text)) targetDate = addDays(today, 2);
+  else {
+    // 这周X / 下周X
+    const weekMap = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '日': 7, '天': 7 };
+    let m = text.match(/这周周?(.)/);
+    if (m && weekMap[m[1]]) {
+      const targetDay = weekMap[m[1]];
+      const curDay = todayDate.getDay() === 0 ? 7 : todayDate.getDay();
+      targetDate = addDays(today, targetDay - curDay);
+      if (targetDate < today) targetDate = addDays(targetDate, 7); // 如果已过，算下周
+    }
+    if (!targetDate) {
+      m = text.match(/下周周?(.)/);
+      if (m && weekMap[m[1]]) {
+        const targetDay = weekMap[m[1]];
+        const curDay = todayDate.getDay() === 0 ? 7 : todayDate.getDay();
+        targetDate = addDays(today, 7 + targetDay - curDay);
+      }
+    }
+    if (!targetDate) {
+      // X号
+      m = text.match(/(\d+)号/);
+      if (m) {
+        const dayNum = parseInt(m[1]);
+        targetDate = `${todayDate.getFullYear()}-${pad(todayDate.getMonth()+1)}-${pad(dayNum)}`;
+        if (targetDate < today) targetDate = addDays(targetDate, 30); // 如果已过，算下月
+      }
+    }
+  }
+  if (!targetDate) targetDate = today; // 默认今天
+
+  // 意图识别
+  if (/上班|调班|补班|加班班/.test(text) && !/加班/.test(text)) type = 'workday';
+  else if (/加班|晚到|到.*点/.test(text)) {
+    type = 'overtime';
+    const tm = text.match(/(\d+)[点:：](\d+)?/) || text.match(/到(\d+)点/);
+    if (tm) endTime = `${pad(parseInt(tm[1]))}:${tm[2] ? pad(parseInt(tm[2])) : '00'}`;
+  }
+  else if (/出差|外出|忙碌|没空|很忙/.test(text)) type = 'busy';
+  else if (/休息|放假|调休|不上班/.test(text)) type = 'restday';
+  else if (/上班|补班/.test(text)) type = 'workday';
+
+  if (!type) return null;
+  return { date: targetDate, type, endTime, reason: text };
+}
+
+// 调整类型中文名
+const OVERRIDE_NAME = { workday: '变工作日', restday: '变休息日', overtime: '加班', busy: '出差/忙碌' };
+
+function render() { renderHeader(); renderSmartBar(); renderStats(); renderDaily(); renderWeekly(); renderMonthly(); renderQuarterly(); renderMood(); }
+
+// 智能调整栏
+function renderSmartBar() {
+  const bar = document.getElementById('smartAdjustBar');
+  const today = todayStr();
+  const ov = getOverride(today);
+  if (ov) {
+    // 今天有调整：显示标记 + 撤销
+    const d = parseDate(today);
+    bar.innerHTML = `<div class="smart-bar"><div class="smart-active"><span>🔧</span><span>今天${OVERRIDE_NAME[ov.type] || '已调整'}</span><span class="tag">${ov.reason}</span><span class="cancel" id="removeOverride">撤销</span></div></div>`;
+    document.getElementById('removeOverride').onclick = () => { delete DB.overrides[today]; saveData(); render(); toast('已撤销调整'); };
+  } else {
+    // 显示输入入口
+    bar.innerHTML = `<div class="smart-bar"><div class="smart-btn" id="smartToggle">🤖 智能调整今日安排</div></div>`;
+    document.getElementById('smartToggle').onclick = () => {
+      bar.innerHTML = `<div class="smart-bar"><div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">🤖 告诉我今天的特殊情况</div><div class="smart-input-row"><input type="text" id="smartInput" placeholder="如：这周六上班、明天休息、今天加班到10点" /><button id="smartGo">解析</button></div><div id="smartPreview"></div></div>`;
+      const input = document.getElementById('smartInput');
+      input.focus();
+      document.getElementById('smartGo').onclick = () => {
+        const text = input.value.trim();
+        if (!text) { toast('请输入内容'); return; }
+        const result = parseUserInput(text);
+        const preview = document.getElementById('smartPreview');
+        if (!result) { preview.innerHTML = '<span style="color:var(--beauty-deep);">没能识别，试试"这周六上班"、"明天休息"、"今天加班到10点"</span>'; return; }
+        const d = parseDate(result.date);
+        const w = ['日','一','二','三','四','五','六'][d.getDay()];
+        let effect = '';
+        if (result.type === 'workday') effect = '隐藏休闲类任务（阅读、电影等）';
+        else if (result.type === 'restday') effect = '按休息日模式安排';
+        else if (result.type === 'overtime') effect = `下班时间延至${result.endTime || '22:00'}`;
+        else if (result.type === 'busy') effect = '只保留核心任务（洗漱、早餐、睡觉）';
+        preview.innerHTML = `识别到：<b>${d.getMonth()+1}月${d.getDate()}日 周${w}${OVERRIDE_NAME[result.type]}</b><br>效果：${effect}<br><button id="smartConfirm" style="margin-top:8px;padding:8px 16px;border:none;border-radius:8px;background:var(--growth-deep);color:white;font-size:13px;cursor:pointer;">确认调整</button>`;
+        document.getElementById('smartConfirm').onclick = () => {
+          if (!DB.overrides) DB.overrides = {};
+          DB.overrides[result.date] = { type: result.type, endTime: result.endTime, reason: text };
+          saveData(); render(); toast(`已调整：${d.getMonth()+1}月${d.getDate()}日${OVERRIDE_NAME[result.type]}`);
+        };
+      };
+    };
+  }
+}
 function renderHeader() {
   const d = new Date(); const weekdays = ['日','一','二','三','四','五','六'];
   const months = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
@@ -369,7 +516,7 @@ function renderStats() {
 function renderTaskList(containerId, freq, label) {
   const today = todayStr();
   const allTasks = getTasks().filter(t => t.freq === freq);
-  const todayTasks = allTasks.filter(t => freq === 'daily' || shouldTaskShowOnDate(t, today));
+  const todayTasks = allTasks.filter(t => freq === 'daily' || shouldShowTask(t, today));
   todayTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const list = document.getElementById(containerId); list.innerHTML = '';
   if (allTasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
@@ -434,7 +581,7 @@ function renderCalendar() {
     el.textContent = i;
     if (ds <= today) {
       // 完成率：统计当天所有该做的任务（每日 + 符合 days 规则的周期任务）
-      const allDayTasks = getTasks().filter(t => t.freq === 'daily' || shouldTaskShowOnDate(t, ds));
+      const allDayTasks = getTasks().filter(t => t.freq === 'daily' || shouldShowTask(t, ds));
       const done = allDayTasks.filter(t => DB.records[t.id] && DB.records[t.id][ds]).length;
       const rate = allDayTasks.length > 0 ? done / allDayTasks.length : 0;
       if (rate > 0) { const bar = document.createElement('div'); bar.className = 'rate-bar'; const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = (rate * 100) + '%'; bar.appendChild(fill); el.appendChild(bar); }
@@ -451,7 +598,7 @@ function renderCalDay() {
   const today = todayStr(); const isFuture = calSelected > today;
   document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}`;
   // 时间轴：每日任务 + 当天应显示的周期任务，按时间排序
-  const tlTasks = getTasks().filter(t => t.freq === 'daily' || shouldTaskShowOnDate(t, calSelected));
+  const tlTasks = getTasks().filter(t => t.freq === 'daily' || shouldShowTask(t, calSelected));
   tlTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const tlContainer = document.getElementById('calTimeline');
   tlContainer.innerHTML = '';
@@ -619,8 +766,8 @@ document.getElementById('manageTasksBtn').onclick = () => {
 document.getElementById('goPlanBtn').onclick = () => document.querySelector('.tab[data-page="plan"]').click();
 document.getElementById('exportBtn').onclick = () => { const data = JSON.stringify(DB); const blob = new Blob([data], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `工作台备份_${todayStr()}.json`; a.click(); URL.revokeObjectURL(url); toast('备份已下载'); };
 document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
-document.getElementById('importFile').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { try { const data = JSON.parse(ev.target.result); if (!data.records) throw new Error('格式错误'); showModal(`<h3>确认导入</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">导入后将覆盖当前数据，是否继续？</p><button class="btn primary" id="confirmImport">确认导入</button><div class="close" onclick="closeModal()">取消</div>`); document.getElementById('confirmImport').onclick = () => { DB = data; if (!DB.tasks) DB.tasks = DEFAULT_TASKS; if (!DB.moods) DB.moods = {}; saveData(); closeModal(); render(); renderPlan(); toast('数据导入成功'); }; } catch(err) { toast('文件格式错误'); } }; reader.readAsText(file); e.target.value = ''; };
-document.getElementById('clearBtn').onclick = () => { showModal(`<h3>清空所有数据</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">此操作不可恢复！建议先导出备份。<br>确定要清空所有数据吗？</p><button class="btn danger" id="confirmClear" style="background:var(--beauty-deep);color:white;">确认清空</button><div class="close" onclick="closeModal()">取消</div>`); document.getElementById('confirmClear').onclick = () => { DB = { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() }; saveData(); closeModal(); render(); renderPlan(); toast('已清空所有数据'); }; };
+document.getElementById('importFile').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { try { const data = JSON.parse(ev.target.result); if (!data.records) throw new Error('格式错误'); showModal(`<h3>确认导入</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">导入后将覆盖当前数据，是否继续？</p><button class="btn primary" id="confirmImport">确认导入</button><div class="close" onclick="closeModal()">取消</div>`); document.getElementById('confirmImport').onclick = () => { DB = data; if (!DB.tasks) DB.tasks = DEFAULT_TASKS; if (!DB.moods) DB.moods = {}; if (!DB.overrides) DB.overrides = {}; saveData(); closeModal(); render(); renderPlan(); toast('数据导入成功'); }; } catch(err) { toast('文件格式错误'); } }; reader.readAsText(file); e.target.value = ''; };
+document.getElementById('clearBtn').onclick = () => { showModal(`<h3>清空所有数据</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">此操作不可恢复！建议先导出备份。<br>确定要清空所有数据吗？</p><button class="btn danger" id="confirmClear" style="background:var(--beauty-deep);color:white;">确认清空</button><div class="close" onclick="closeModal()">取消</div>`); document.getElementById('confirmClear').onclick = () => { DB = { tasks: DEFAULT_TASKS, records: {}, moods: {}, overrides: {}, startDate: todayStr() }; saveData(); closeModal(); render(); renderPlan(); toast('已清空所有数据'); }; };
 
 render();
 // 每 7 天提醒备份一次
