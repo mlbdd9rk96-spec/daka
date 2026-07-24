@@ -294,23 +294,21 @@ function getTaskCount(taskId, refDate) {
 }
 function toggleTask(taskId, date) { if (!DB.records[taskId]) DB.records[taskId] = {}; if (DB.records[taskId][date]) delete DB.records[taskId][date]; else DB.records[taskId][date] = 1; saveData(); }
 
-// 计算某日期是第几周（从 startDate 起算），用于双周交替
+// 计算某日期是第几周（固定基准：2026-01-05 第一个周一），用于双周交替
 function getWeekIndex(date) {
-  const start = DB.startDate ? parseDate(DB.startDate) : parseDate('2026-01-05'); // 2026年第一个周一
+  const start = parseDate('2026-01-05');
   const d = parseDate(date);
   const diff = Math.floor((d - start) / (7 * 24 * 60 * 60 * 1000));
   return diff;
 }
 
-// 判断某任务在某日期是否应该显示（根据days规则 + 双周交替）
+// 判断某任务在某日期是否符合 days 规则（不含完成状态判断）
 function shouldTaskShowOnDate(task, date) {
   if (task.freq === 'daily') return true;
   const d = parseDate(date);
-  if (getTaskCount(task.id, date) >= task.target) return false;
-  if (!task.days || task.days.length === 0) return true; // 未设置days则每天都显示
+  if (!task.days || task.days.length === 0) return true;
   if (task.freq === 'weekly') {
     if (!task.days.includes(d.getDay() === 0 ? 7 : d.getDay())) return false;
-    // 双周交替：biweek=0 偶数周显示，biweek=1 奇数周显示
     if (task.biweek !== undefined) return getWeekIndex(date) % 2 === task.biweek;
     return true;
   }
@@ -380,28 +378,41 @@ function renderStats() {
   document.getElementById('weekRate').textContent = wt > 0 ? Math.round(wd / wt * 100) + '%' : '0%';
 }
 function renderTaskList(containerId, freq, label) {
-  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq).filter(t => freq === 'daily' || shouldTaskShowOnDate(t, today));
-  tasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
-  const list = document.getElementById(containerId); list.innerHTML = ''; let done = 0;
-  if (tasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
-  tasks.forEach(t => {
+  const today = todayStr();
+  const allTasks = getTasks().filter(t => t.freq === freq);
+  const todayTasks = allTasks.filter(t => freq === 'daily' || shouldTaskShowOnDate(t, today));
+  todayTasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
+  const list = document.getElementById(containerId); list.innerHTML = '';
+  if (allTasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
+  // 统计：已完成的任务数（用于显示 x/y）
+  let done = 0;
+  allTasks.forEach(t => {
+    let isDone;
+    if (freq === 'daily') isDone = DB.records[t.id] && DB.records[t.id][today];
+    else isDone = getTaskCount(t.id, today) >= t.target;
+    if (isDone) done++;
+  });
+  // 只显示今天该显示且未完成的任务
+  todayTasks.forEach(t => {
     let isDone, progressText;
     if (freq === 'daily') { isDone = DB.records[t.id] && DB.records[t.id][today]; progressText = ''; }
     else { const count = getTaskCount(t.id, today); isDone = count >= t.target; progressText = `${count}/${t.target}`; }
-    if (isDone) done++;
-    if (isDone) return;
+    if (isDone) return; // 已完成的不在列表中显示
     const el = document.createElement('div');
-    el.className = 'task-item' + (isDone ? ' done' : '');
+    el.className = 'task-item';
     const showTime = t.time;
     const daysInfo = freq !== 'daily' ? daysText(t) : '';
-    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}`;
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress">${progressText}</div>` : ''}`;
     el.onclick = () => { toggleTask(t.id, today); render(); };
     list.appendChild(el);
   });
   const doneKey = freq === 'daily' ? 'dailyDone' : freq === 'weekly' ? 'weekDone' : freq === 'monthly' ? 'monthDone' : 'quarterDone';
   const totalKey = freq === 'daily' ? 'dailyTotal' : freq === 'weekly' ? 'weekTotal' : freq === 'monthly' ? 'monthTotal' : 'quarterTotal';
-  document.getElementById(doneKey).textContent = done; document.getElementById(totalKey).textContent = tasks.length;
-  if (done === tasks.length && tasks.length > 0) { const el = document.createElement('div'); el.className = 'empty'; el.textContent = ['全部完成！太棒了 🎉','今日已清空，厉害 💪','都搞定啦，休息一下吧 ✨'][Math.floor(Math.random()*3)]; list.appendChild(el); }
+  // total 显示今天该做的任务数（不是该频率的所有任务数）
+  const todayTotal = todayTasks.length;
+  document.getElementById(doneKey).textContent = Math.min(done, todayTotal);
+  document.getElementById(totalKey).textContent = todayTotal;
+  if (done >= todayTotal && todayTotal > 0) { const el = document.createElement('div'); el.className = 'empty'; el.textContent = ['全部完成！太棒了 🎉','今日已清空，厉害 💪','都搞定啦，休息一下�� ✨'][Math.floor(Math.random()*3)]; list.appendChild(el); }
 }
 function renderDaily() { renderTaskList('dailyList', 'daily', '每天'); }
 function renderWeekly() { renderTaskList('weekList', 'weekly', '本周'); }
