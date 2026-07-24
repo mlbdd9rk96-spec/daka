@@ -183,6 +183,7 @@
     <div class="section">
       <div class="section-title"><span class="dot" style="background:var(--beauty-deep)"></span><span id="calDayLabel">选择日期查看</span></div>
       <div class="timeline" id="calTimeline"><div class="empty">点击上方日期查看详情</div></div>
+      <div id="calExtraTasks" style="margin-top:12px;"></div>
     </div>
   </div>
 
@@ -278,11 +279,8 @@ function getTasks() { return DB.tasks; }
 function findTask(id) { return DB.tasks.find(t => t.id === id); }
 // 获取当天应该显示的任务（每日 + 本周期内的周/月/季任务），按时间排序
 function getTodayTasks(date) {
-  const tasks = getTasks();
-  return tasks.filter(t => {
-    if (t.freq === 'daily') return true;
-    return getTaskCount(t.id, date) < t.target;
-  }).sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+  return getTasks().filter(t => t.freq === 'daily')
+    .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
 }
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -356,7 +354,8 @@ function renderStats() {
   document.getElementById('weekRate').textContent = wt > 0 ? Math.round(wd / wt * 100) + '%' : '0%';
 }
 function renderTaskList(containerId, freq, label) {
-  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq).sort((a,b) => (a.time||'99').localeCompare(b.time||'99'));
+  const today = todayStr(); const tasks = getTasks().filter(t => t.freq === freq);
+  if (freq === 'daily') tasks.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99'));
   const list = document.getElementById(containerId); list.innerHTML = ''; let done = 0;
   if (tasks.length === 0) { list.innerHTML = '<div class="empty">暂无任务，去规划页添加</div>'; return; }
   tasks.forEach(t => {
@@ -367,7 +366,8 @@ function renderTaskList(containerId, freq, label) {
     if (isDone) return;
     const el = document.createElement('div');
     el.className = 'task-item' + (isDone ? ' done' : '');
-    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name"><span class="task-time-label">${t.time || ''}</span>${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}`;
+    const showTime = freq === 'daily' && t.time;
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress ${isDone ? 'done' : ''}">${progressText}</div>` : ''}`;
     el.onclick = () => { toggleTask(t.id, today); render(); };
     list.appendChild(el);
   });
@@ -411,7 +411,31 @@ function renderCalDay() {
   const d = parseDate(calSelected); const weekdays = ['日','一','二','三','四','五','六'];
   const today = todayStr(); const isFuture = calSelected > today;
   document.getElementById('calDayLabel').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${weekdays[d.getDay()]}${isFuture ? ' · 预览' : ''}`;
-  renderTimelineForDate('calTimeline', calSelected, isFuture);
+  // 时间轴只显示每日任务
+  renderTimelineForDate('calTimeline', calSelected, isFuture, true);
+  // 周/月/季任务单独列
+  const extra = document.getElementById('calExtraTasks');
+  extra.innerHTML = '';
+  const extraTasks = getTasks().filter(t => t.freq !== 'daily' && getTaskCount(t.id, calSelected) < t.target);
+  if (extraTasks.length > 0) {
+    const title = document.createElement('div');
+    title.className = 'section-title';
+    title.style.marginTop = '8px';
+    title.innerHTML = '<span class="dot" style="background:var(--growth-deep)"></span>周期任务';
+    extra.appendChild(title);
+    const list = document.createElement('div');
+    list.className = 'task-list';
+    extraTasks.forEach(t => {
+      const count = getTaskCount(t.id, calSelected);
+      const isDone = count >= t.target;
+      const el = document.createElement('div');
+      el.className = 'task-item' + (isDone ? ' done' : '');
+      el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div></div><div class="task-progress ${isDone ? 'done' : ''}">${count}/${t.target}</div>`;
+      if (!isFuture) { el.onclick = () => { toggleTask(t.id, calSelected); renderCalDay(); render(); }; }
+      list.appendChild(el);
+    });
+    extra.appendChild(list);
+  }
 }
 
 // 规划页
@@ -423,7 +447,7 @@ function renderPlan() {
     if (catTasks.length === 0) return;
     const el = document.createElement('div'); el.className = 'plan-cat-card';
     let rows = '';
-    catTasks.forEach(t => { rows += `<div class="plan-task-row" data-task-id="${t.id}"><span class="pt-name">${t.time || ''} ${t.name}</span><span class="pt-freq">${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div>`; });
+    catTasks.forEach(t => { rows += `<div class="plan-task-row" data-task-id="${t.id}"><span class="pt-name">${t.name}</span><span class="pt-freq">${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</span></div>`; });
     el.innerHTML = `<div class="plan-cat-header"><span class="cat-icon">${CAT_ICON[cat]}</span><span class="cat-name">${CAT_NAME[cat]}</span><span class="cat-count">${catTasks.length} 项</span></div>${rows}`;
     el.querySelectorAll('.plan-task-row').forEach(row => { row.onclick = () => { const task = findTask(row.dataset.taskId); if (task) showDeleteTask(task); }; });
     container.appendChild(el);
@@ -434,13 +458,21 @@ function renderPlan() {
 function showAddTaskModal(prefill) {
   const catOptions = Object.keys(CAT_NAME).map(c => `<option value="${c}" ${prefill && prefill.cat === c ? 'selected' : ''}>${CAT_NAME[c]}</option>`).join('');
   const freqOptions = Object.keys(FREQ_NAME).map(f => `<option value="${f}" ${prefill && prefill.freq === f ? 'selected' : ''}>${FREQ_NAME[f]}</option>`).join('');
-  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field"><label>时间</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field"><label>目标次数</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30"></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
-  document.getElementById('taskFreqInput').onchange = (e) => { const ti = document.getElementById('taskTargetInput'); if (e.target.value === 'daily') ti.value = 1; else if (ti.value < 2) ti.value = 3; };
+  showModal(`<h3>${prefill ? '编辑任务' : '添加任务'}</h3><div class="field"><label>任务名称</label><input type="text" id="taskNameInput" value="${prefill ? prefill.name : ''}" placeholder="如：练字"></div><div class="field" id="timeField"><label>时间（仅每日任务）</label><input type="time" id="taskTimeInput" value="${prefill ? prefill.time || '08:00' : '08:00'}"></div><div class="field"><label>分类</label><select id="taskCatInput">${catOptions}</select></div><div class="field"><label>频率</label><select id="taskFreqInput">${freqOptions}</select></div><div class="field"><label>目标次数</label><input type="number" id="taskTargetInput" value="${prefill ? prefill.target : 1}" min="1" max="30"></div><button class="btn primary" id="saveTaskBtn">保存</button><div class="close" onclick="closeModal()">取消</div>`);
+  document.getElementById('taskFreqInput').onchange = (e) => {
+    const ti = document.getElementById('taskTargetInput');
+    const tf = document.getElementById('timeField');
+    if (e.target.value === 'daily') { ti.value = 1; tf.style.display = 'block'; }
+    else { if (ti.value < 2) ti.value = 3; tf.style.display = 'none'; }
+  };
+  // 初始化时间字段显示
+  if (prefill && prefill.freq !== 'daily') document.getElementById('timeField').style.display = 'none';
+  else if (!prefill) document.getElementById('timeField').style.display = 'block';
   document.getElementById('saveTaskBtn').onclick = () => {
     const name = document.getElementById('taskNameInput').value.trim();
     if (!name) { toast('请输入任务名称'); return; }
-    const time = document.getElementById('taskTimeInput').value;
     const cat = document.getElementById('taskCatInput').value; const freq = document.getElementById('taskFreqInput').value;
+    const time = freq === 'daily' ? document.getElementById('taskTimeInput').value : '';
     const target = Math.max(1, parseInt(document.getElementById('taskTargetInput').value) || 1);
     if (prefill) { const task = findTask(prefill.id); if (task) { task.name = name; task.time = time; task.cat = cat; task.freq = freq; task.target = target; } }
     else { DB.tasks.push({ id: 't_' + Date.now(), name, time, cat, freq, target }); }
@@ -503,9 +535,9 @@ document.getElementById('planAddTaskBtn').onclick = () => showAddTaskModal(null)
 document.getElementById('manageTasksBtn').onclick = () => {
   showModal(`<h3>编辑任务</h3><p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">点击任务可编辑或删除</p><div id="taskEditList" style="max-height:300px;overflow-y:auto;"></div><button class="btn primary" id="addNewTaskFromManage">+ 添加新任务</button><div class="close" onclick="closeModal()">关闭</div>`);
   const listEl = document.getElementById('taskEditList');
-  getTasks().sort((a,b) => (a.time||'99').localeCompare(b.time||'99')).forEach(t => {
+  getTasks().forEach(t => {
     const el = document.createElement('div'); el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--line);cursor:pointer;';
-    el.innerHTML = `<div><div style="font-size:14px;">${t.time || ''} ${t.name}</div><div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}</div></div><span style="color:var(--ink-faint);">›</span>`;
+    el.innerHTML = `<div><div style="font-size:14px;">${t.name}</div><div style="font-size:11px;color:var(--ink-soft);">${CAT_NAME[t.cat]} · ${FREQ_NAME[t.freq]}${t.target>1?' '+t.target+'次':''}${t.freq==='daily'&&t.time?' · '+t.time:''}</div></div><span style="color:var(--ink-faint);">›</span>`;
     el.onclick = () => { closeModal(); showDeleteTask(t); }; listEl.appendChild(el);
   });
   document.getElementById('addNewTaskFromManage').onclick = () => { closeModal(); showAddTaskModal(null); };
