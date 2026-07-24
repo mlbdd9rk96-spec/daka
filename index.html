@@ -57,8 +57,11 @@
   .tag-family { background: rgba(242,217,182,0.3); color: var(--family-deep); }
   .tag-leisure { background: rgba(169,214,229,0.3); color: var(--leisure-deep); }
   .tag-life { background: rgba(200,188,180,0.25); color: var(--ink-soft); }
-  .task-progress { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; padding-right: 4px; }
+  .task-progress { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; padding-right: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
   .task-progress.done { color: var(--health-deep); font-weight: 600; }
+  .task-progress .mini-bar { width: 40px; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .task-progress .mini-bar .mini-fill { height: 100%; background: var(--beauty-deep); border-radius: 2px; transition: width 0.3s ease; }
+  .task-progress.done .mini-bar .mini-fill { background: var(--health-deep); }
   .add-task-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border: 1.5px dashed var(--ink-faint); border-radius: 12px; color: var(--ink-soft); font-size: 13px; cursor: pointer; background: transparent; width: 100%; }
   .add-task-btn:active { background: var(--line); }
   .calendar-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft); }
@@ -178,7 +181,7 @@
   <div class="page" id="page-calendar">
     <div class="header"><h1>打卡日历</h1><div class="greeting">点击日期查看时间轴</div></div>
     <div class="section"><div class="calendar-card">
-      <div class="cal-header"><div class="month-label" id="calMonthLabel"></div><div class="cal-nav"><button id="calPrev">‹</button><button id="calNext">›</button></div></div>
+      <div class="cal-header"><div class="month-label" id="calMonthLabel"></div><div class="cal-nav"><button id="calToday" style="font-size:11px;width:auto;padding:0 10px;border-radius:14px;">今天</button><button id="calPrev">‹</button><button id="calNext">›</button></div></div>
       <div class="cal-grid" id="calGrid"></div>
     </div></div>
     <div class="section">
@@ -344,16 +347,17 @@ function renderHeader() {
 }
 function renderStats() {
   const today = todayStr(); const tasks = getTasks();
+  const dt = tasks.filter(t => t.freq === 'daily');
+  // 连续打卡：如果今天全打了算今天，否则从昨天往前数
   let streak = 0, cur = today;
-  while (true) {
-    const dt = tasks.filter(t => t.freq === 'daily');
-    if (dt.length === 0) break;
+  const todayAllDone = dt.length > 0 && dt.every(t => DB.records[t.id] && DB.records[t.id][cur]);
+  if (!todayAllDone) cur = addDays(cur, -1); // 今天没全打，从昨天开始数
+  while (dt.length > 0) {
     if (dt.every(t => DB.records[t.id] && DB.records[t.id][cur])) { streak++; cur = addDays(cur, -1); }
-    else { if (cur === today) { cur = addDays(cur, -1); continue; } break; }
+    else break;
     if (streak > 365) break;
   }
   document.getElementById('streakNum').textContent = streak;
-  const dt = tasks.filter(t => t.freq === 'daily');
   const td = dt.filter(t => DB.records[t.id] && DB.records[t.id][today]).length;
   document.getElementById('todayRate').textContent = dt.length > 0 ? Math.round(td / dt.length * 100) + '%' : '0%';
   const ws = weekStart(today); let wt = 0, wd = 0;
@@ -386,11 +390,11 @@ function renderTaskList(containerId, freq, label) {
     el.className = 'task-item';
     const showTime = t.time;
     const daysInfo = freq !== 'daily' ? daysText(t) : '';
-    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress">${progressText}</div>` : ''}`;
-    el.onclick = () => { toggleTask(t.id, today); render(); };
+    el.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></div><div class="task-info"><div class="task-name">${showTime ? `<span class="task-time-label">${t.time}</span>` : ''}${t.name}</div><div class="task-meta"><span class="task-tag tag-${t.cat}">${CAT_NAME[t.cat]}</span><span>${daysInfo ? daysInfo + ' · ' : ''}${label}${t.target > 1 ? ' ' + t.target + '次' : ''}</span></div></div>${progressText ? `<div class="task-progress${isDone ? ' done' : ''}">${progressText}<div class="mini-bar"><div class="mini-fill" style="width:${Math.round(count/t.target*100)}%"></div></div></div>` : ''}`;
+    el.onclick = () => { if (longPressed) { longPressed = false; return; } toggleTask(t.id, today); render(); };
     // 长按删除
-    let pressTimer;
-    el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { if (confirm(`删除任务「${t.name}」？`)) { DB.tasks = DB.tasks.filter(x => x.id !== t.id); saveData(); render(); renderPlan(); toast('任务已删除'); } }, 600); });
+    let pressTimer; let longPressed = false;
+    el.addEventListener('touchstart', () => { longPressed = false; pressTimer = setTimeout(() => { longPressed = true; if (confirm(`删除任务「${t.name}」？`)) { DB.tasks = DB.tasks.filter(x => x.id !== t.id); saveData(); render(); renderPlan(); toast('任务已删除'); } }, 600); });
     el.addEventListener('touchend', () => clearTimeout(pressTimer));
     el.addEventListener('touchmove', () => clearTimeout(pressTimer));
     list.appendChild(el);
@@ -566,30 +570,8 @@ function showDeleteTask(task) {
   document.getElementById('editTaskBtn').onclick = () => { closeModal(); showAddTaskModal(task); };
 }
 
-// 统计
-function renderStatsPage() {
-  const today = todayStr(); const start30 = addDays(today, -29);
-  const container = document.getElementById('taskStats'); container.innerHTML = '';
-  getTasks().forEach(t => {
-    let total = 0, done = 0;
-    if (t.freq === 'daily') { let cur = start30; while (cur <= today) { total++; if (DB.records[t.id] && DB.records[t.id][cur]) done++; cur = addDays(cur, 1); } }
-    else { let cur = start30; while (cur <= today) { total++; if (getTaskCount(t.id, cur) >= t.target) done++; cur = addDays(cur, 7); } }
-    const pct = total > 0 ? Math.round(done / total * 100) : 0;
-    const el = document.createElement('div'); el.className = 'bar-row';
-    el.innerHTML = `<div class="name">${t.name}</div><div class="bar"><div class="fill" style="width:${pct}%;background:${CAT_COLOR[t.cat]}"></div></div><div class="pct">${pct}%</div>`;
-    container.appendChild(el);
-  });
-  const ms = monthStart(today); const monthTasks = getTasks().filter(t => t.freq === 'monthly');
-  let mDone = 0; monthTasks.forEach(t => { if (getTaskCount(t.id, today) >= t.target) mDone++; });
-  const mTotal = monthTasks.length; const dailyTasks = getTasks().filter(t => t.freq === 'daily');
-  let dDays = 0; let cur = ms;
-  while (cur <= today) { if (dailyTasks.every(t => DB.records[t.id] && DB.records[t.id][cur])) dDays++; cur = addDays(cur, 1); }
-  const dayOfMonth = parseDate(today).getDate();
-  document.getElementById('monthOverview').innerHTML = `<div class="bar-row"><div class="name">每日打卡</div><div class="bar"><div class="fill" style="width:${dayOfMonth>0?Math.round(dDays/dayOfMonth*100):0}%;background:var(--beauty-deep)"></div></div><div class="pct">${dDays}/${dayOfMonth}</div></div><div class="bar-row"><div class="name">月度任务</div><div class="bar"><div class="fill" style="width:${mTotal>0?Math.round(mDone/mTotal*100):0}%;background:var(--family-deep)"></div></div><div class="pct">${mDone}/${mTotal}</div></div>`;
-  const badges = document.getElementById('badges'); badges.innerHTML = '';
-  const streak = parseInt(document.getElementById('streakNum').textContent) || 0;
-  [{icon:'🌱',name:'7天',u:streak>=7},{icon:'🌿',name:'30天',u:streak>=30},{icon:'🌳',name:'100天',u:streak>=100},{icon:'🏆',name:'全勤月',u:dDays===dayOfMonth&&dayOfMonth>0},{icon:'🎯',name:'月度全满',u:mDone===mTotal&&mTotal>0}].forEach(b => { const el = document.createElement('div'); el.style.cssText = `text-align:center;opacity:${b.u?1:0.25};filter:${b.u?'none':'grayscale(1)'};`; el.innerHTML = `<div style="font-size:28px;">${b.icon}</div><div style="font-size:10px;color:var(--ink-soft);margin-top:2px;">${b.name}</div>`; badges.appendChild(el); });
-}
+// 统计（已废弃，保留空函数防止报错）
+function renderStatsPage() {}
 
 function showModal(html) { document.getElementById('modalContent').innerHTML = html; document.getElementById('modalMask').classList.add('show'); }
 function closeModal() { document.getElementById('modalMask').classList.remove('show'); }
@@ -612,6 +594,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 document.getElementById('calPrev').onclick = () => { calRef.setMonth(calRef.getMonth() - 1); renderCalendar(); };
 document.getElementById('calNext').onclick = () => { calRef.setMonth(calRef.getMonth() + 1); renderCalendar(); };
+document.getElementById('calToday').onclick = () => { calRef = new Date(); calSelected = todayStr(); renderCalendar(); };
 document.getElementById('planAddTaskBtn').onclick = () => showAddTaskModal(null);
 document.getElementById('manageTasksBtn').onclick = () => {
   showModal(`<h3>编辑任务</h3><p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">点击任务可编辑或删除</p><div id="taskEditList" style="max-height:300px;overflow-y:auto;"></div><button class="btn primary" id="addNewTaskFromManage">+ 添加新任务</button><div class="close" onclick="closeModal()">关闭</div>`);
@@ -630,6 +613,20 @@ document.getElementById('importFile').onchange = (e) => { const file = e.target.
 document.getElementById('clearBtn').onclick = () => { showModal(`<h3>清空所有数据</h3><p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-align:center;">此操作不可恢复！建议先导出备份。<br>确定要清空所有数据吗？</p><button class="btn danger" id="confirmClear" style="background:var(--beauty-deep);color:white;">确认清空</button><div class="close" onclick="closeModal()">取消</div>`); document.getElementById('confirmClear').onclick = () => { DB = { tasks: DEFAULT_TASKS, records: {}, moods: {}, startDate: todayStr() }; saveData(); closeModal(); render(); renderPlan(); toast('已清空所有数据'); }; };
 
 render();
+// 每 7 天提醒备份一次
+(function() {
+  const lastBackup = DB.lastBackupReminder || '2026-01-01';
+  const today = todayStr();
+  const diff = Math.floor((parseDate(today) - parseDate(lastBackup)) / (7 * 24 * 60 * 60 * 1000));
+  if (diff >= 1) {
+    setTimeout(() => {
+      if (confirm('已经一段时间没备份数据了，要现在导出备份吗？\n（数据存在本地，清缓存会丢失）')) {
+        document.getElementById('exportBtn').click();
+      }
+      DB.lastBackupReminder = today; saveData();
+    }, 3000);
+  }
+})();
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/daka/sw.js').then(reg => { reg.addEventListener('updatefound', () => { const nw = reg.installing; nw.addEventListener('statechange', () => { if (nw.state === 'installed' && navigator.serviceWorker.controller) { nw.postMessage({ type: 'SKIP_WAITING' }); window.location.reload(); } }); }); }).catch(() => {}); }
 </script>
 </body>
