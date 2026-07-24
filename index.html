@@ -352,6 +352,7 @@ function daysText(task) {
 
 // ========== 智能调整（本地规则匹配）==========
 const REST_CATS = ['leisure']; // 休闲类：休息日才做
+const REST_IDS = ['reading', 'piano', 'craft', 'movie']; // 休息日专属任务（变工作日时隐藏）
 const CORE_IDS = ['wash', 'breakfast', 'sleep']; // 核心：出差也保留
 
 // 获取某日的调整规则
@@ -365,8 +366,9 @@ function applyOverride(task, date) {
   const weekday = d.getDay() === 0 ? 7 : d.getDay();
   const isWeekend = weekday >= 6;
   if (ov.type === 'workday') {
-    // 休息日变工作日：隐藏休闲类
+    // 休息日变工作日：隐藏休闲类 + 休息日专属任务
     if (REST_CATS.includes(task.cat)) return false;
+    if (REST_IDS.includes(task.id)) return false;
     return true;
   }
   if (ov.type === 'restday') {
@@ -384,18 +386,36 @@ function applyOverride(task, date) {
     return CORE_IDS.includes(task.id);
   }
   if (ov.type === 'overtime') {
-    // 加班：隐藏时间在 endTime 之后的非核心任务
-    if (task.time && ov.endTime && task.time > ov.endTime) return false;
+    // 加班：隐藏时间在 endTime 之后的任务（仅当晚间时段）
+    if (task.time && ov.endTime && ov.endTime >= '18:00' && task.time > ov.endTime) return false;
     return true;
   }
   return true;
 }
 
-// 综合判断：days 规则 + override
+// 综合判断：override 优先 + days 规则
 function shouldShowTask(task, date) {
-  if (!shouldTaskShowOnDate(task, date)) return false;
-  if (!applyOverride(task, date)) return false;
-  return true;
+  const ov = getOverride(date);
+  // 有 override 时，override 决定是否显示（跳�� days 规则）
+  if (ov) {
+    if (ov.type === 'restday') {
+      // 变休息日：每日任务 + 周末任务都显示
+      if (task.freq === 'daily') return true;
+      if (task.freq === 'weekly' && task.days) {
+        const d = parseDate(date);
+        const weekday = d.getDay() === 0 ? 7 : d.getDay();
+        if (task.days.includes(weekday)) return true;
+        if (task.days.some(dd => dd >= 6)) return true; // 周末任务在休息日显示
+      }
+      // 月度/季度任务正常走 days
+      return shouldTaskShowOnDate(task, date);
+    }
+    // 其他 override 类型先走 days，再走 applyOverride
+    if (!shouldTaskShowOnDate(task, date)) return false;
+    return applyOverride(task, date);
+  }
+  // 无 override：只走 days 规则
+  return shouldTaskShowOnDate(task, date);
 }
 
 // 解析用户输入
@@ -453,8 +473,8 @@ function parseUserInput(text) {
 
 const OVERRIDE_NAME = { workday: '变工作日', restday: '变休息日', overtime: '加班', busy: '出差/忙碌' };
 const OVERRIDE_EFFECT = {
-  workday: '隐藏休闲类任务（阅读、电影等）',
-  restday: '按休息日模式安排',
+  workday: '隐藏休闲任务（阅读、电影、钢琴、手工）',
+  restday: '显示休息日任务（阅读、运动等）',
   overtime: '隐藏加班结束后的晚间任务',
   busy: '只保留核心任务（洗漱、早餐、睡觉）'
 };
