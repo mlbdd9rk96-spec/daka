@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>我的工作台 · 每日打卡</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#F4B6C2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="工作台">
 <style>
   :root {
     --bg: #FDF6F0;
@@ -2394,6 +2399,25 @@ initImgDB().then(() => {
 }).catch(() => {
   render();
 });
+
+// 注册 Service Worker，实现 PWA 自动更新
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/daka/sw.js')
+    .then(reg => {
+      // 检查更新
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // 发现新版本，自动刷新页面
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+            window.location.reload();
+          }
+        });
+      });
+    })
+    .catch(err => console.log('SW 注册失败:', err));
+}
 </script>
 </body>
 </html>
